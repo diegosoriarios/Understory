@@ -6,9 +6,9 @@
 [ext_resource path="res://Objects/Spwaner.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Objects/Chave.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Objects/Door.tscn" type="PackedScene" id=6]
-[ext_resource path="res://Objects/Enemies/Enemy7.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Objects/Enemies/Enemy4.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Objects/Spikes.tscn" type="PackedScene" id=8]
-[ext_resource path="res://Objects/Enemies/Enemy4.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Objects/Enemies/Enemy7.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Objects/Enemies/Boss2.tscn" type="PackedScene" id=10]
 
 [sub_resource type="Environment" id=1]
@@ -35,10 +35,10 @@ position = Vector2( 80, 432 )
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 1 )
 
-[node name="Enemy4" parent="." instance=ExtResource( 9 )]
+[node name="Enemy4" parent="." instance=ExtResource( 7 )]
 position = Vector2( 464, 304 )
 
-[node name="Enemy7" parent="." instance=ExtResource( 7 )]
+[node name="Enemy7" parent="." instance=ExtResource( 9 )]
 position = Vector2( 656, 432 )
 
 [node name="Spikes1" parent="." instance=ExtResource( 8 )]

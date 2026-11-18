@@ -29,6 +29,8 @@ SCENES = {
     "lava": "res://Objects/Lava.tscn",
     "spikes": "res://Objects/Spikes.tscn",
     "mover": "res://EnemyH.tscn",
+    "doublejump": "res://Objects/DoubleJumpPickup.tscn",
+    "walljump": "res://Objects/WallJumpPickup.tscn",
     "W": "res://Objects/Enemies/Walker.tscn",
     "F": "res://Objects/Enemies/Fly1.tscn",
     "G": "res://Objects/Enemies/Fly2.tscn",
@@ -49,6 +51,7 @@ SCENES = {
 # entity symbol -> ext-resource key (identity unless listed)
 SYM_TO_KEY = {
     "^": "spikes", "N": "portal", "S": "spawner", "K": "key", "D": "door", "H": "mover",
+    "A": "doublejump", "J": "walljump",
 }
 
 # tile id -> atlas coords in JungleDirtTileSet
@@ -60,6 +63,7 @@ NAME_BY_SYMBOL = {
     "3": "Enemy3", "4": "Enemy4", "5": "Enemy5", "7": "Enemy7", "9": "Enemy9",
     "E": "Enemy11", "T": "Enemy12", "S": "Spawner", "H": "Platform",
     "^": "Spikes", "K": "Key", "D": "Door", "N": "Portal", "B": "Boss",
+    "A": "DoubleJumpPickup", "J": "WallJumpPickup",
 }
 
 LEVELS = [
@@ -148,22 +152,24 @@ LEVELS = [
             "." * 64,
             "." * 64,
             "." * 64,
-            "." * 50 + "===" + "." * 11,
-            "." * 64,
-            "." * 51 + "===" + "." * 10,
-            "." * 64,
-            "." * 64,
-            "." * 48 + "===" + "." * 7 + "#####.",
-            "." * 20 + "===" + "." * 4 + "===" + "." * 8 + "===" + "." * 17 + "#####" + ".",
-            "." * 64,
-            "." * 64,
-            "." * 64,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 35 + "===" + "." * 11,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 36 + "===" + "." * 10,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 33 + "===" + "." * 7 + "#####.",
+            "." * 9 + "#" + "." * 4 + "#" + "." * 5 + "===" + "." * 4 + "===" + "." * 8 + "===" + "." * 17 + "#####" + ".",
+            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
+            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
+            "." * 14 + "#" + "." * 49,
             "#" * 18 + "L" * 28 + "#" * 18,
             "#" * 64,
         ],
         "entities": [
             ("M", 2, 15),
-            ("W", 10, 15),
+            ("J", 4, 15),
+            ("W", 7, 15),
+            ("A", 16, 15),
             ("S", 26, 8),
             ("H", 34, 14),
             ("F", 30, 11),

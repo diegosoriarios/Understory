@@ -7,10 +7,10 @@
 [ext_resource path="res://Objects/Chave.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Objects/Door.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Objects/Spikes.tscn" type="PackedScene" id=7]
-[ext_resource path="res://Objects/Enemies/Enemy3.tscn" type="PackedScene" id=8]
-[ext_resource path="res://Objects/Enemies/Walker.tscn" type="PackedScene" id=9]
-[ext_resource path="res://Objects/Enemies/Enemy2.tscn" type="PackedScene" id=10]
-[ext_resource path="res://Objects/Enemies/Enemy1.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Objects/Enemies/Walker.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Objects/Enemies/Enemy2.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Objects/Enemies/Enemy1.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Objects/Enemies/Enemy3.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Objects/Lava.tscn" type="PackedScene" id=12]
 
 [sub_resource type="Environment" id=1]
@@ -37,30 +37,30 @@ position = Vector2( 80, 432 )
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 1 )
 
-[node name="Walker" parent="." instance=ExtResource( 9 )]
+[node name="Walker" parent="." instance=ExtResource( 8 )]
 position = Vector2( 336, 432 )
 
-[node name="Enemy1" parent="." instance=ExtResource( 11 )]
+[node name="Enemy1" parent="." instance=ExtResource( 10 )]
 position = Vector2( 560, 272 )
 
-[node name="Walker2" parent="." instance=ExtResource( 9 )]
+[node name="Walker2" parent="." instance=ExtResource( 8 )]
 position = Vector2( 848, 432 )
 
 [node name="Spawner1" parent="." instance=ExtResource( 4 )]
 position = Vector2( 912, 432 )
-enemies = [ ExtResource( 11 ), ExtResource( 8 ) ]
+enemies = [ ExtResource( 10 ), ExtResource( 11 ) ]
 limit = 2
 
-[node name="Enemy3" parent="." instance=ExtResource( 8 )]
+[node name="Enemy3" parent="." instance=ExtResource( 11 )]
 position = Vector2( 1168, 432 )
 
-[node name="Enemy2" parent="." instance=ExtResource( 10 )]
+[node name="Enemy2" parent="." instance=ExtResource( 9 )]
 position = Vector2( 1424, 272 )
 
 [node name="Key" parent="." instance=ExtResource( 5 )]
 position = Vector2( 1520, 272 )
 
-[node name="Enemy12" parent="." instance=ExtResource( 11 )]
+[node name="Enemy12" parent="." instance=ExtResource( 10 )]
 position = Vector2( 1616, 432 )
 
 [node name="Spikes1" parent="." instance=ExtResource( 7 )]

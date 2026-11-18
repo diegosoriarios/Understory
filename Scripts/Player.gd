@@ -4,6 +4,9 @@ const UP = Vector2(0, -1)
 const MAX_HP = 3
 const COYOTE_TIME = 0.09
 const JUMP_BUFFER_TIME = 0.1
+const WALL_SLIDE_SPEED = 60.0
+const WALL_JUMP_PUSH = 260.0
+const WALL_JUMP_LOCK = 0.16
 var motion = Vector2()
 var speed = 200
 var gravity = 10
@@ -24,14 +27,19 @@ var is_jumping
 var hp = MAX_HP
 var coyote = 0.0
 var jump_buffer = 0.0
+var wall_lock = 0.0
 
 @onready var hud_hearts: Label = $HUD/Hearts
 @onready var hud_time: Label = $HUD/Time
 @onready var hud_deaths: Label = $HUD/Deaths
+@onready var hud_toast: Label = $HUD/Toast
 
 var Bullet = preload('res://Objects/Bullet.tscn')
 
 func _process(delta):
+	if hud_toast.modulate.a > 0.0:
+		hud_toast.modulate.a = maxf(hud_toast.modulate.a - delta * 0.5, 0.0)
+	
 	animation += .15
 	if int(animation) == 8:
 		animation = 0
@@ -57,6 +65,15 @@ func _physics_process(delta):
 	motion.y += gravity
 	var friction = false
 	global.time += delta
+	wall_lock = maxf(wall_lock - delta, 0.0)
+	
+	var wall_normal = Vector2.ZERO
+	if global.wall_jump and is_on_wall() and not is_on_floor():
+		wall_normal = get_wall_normal()
+		var input_dir = Input.get_axis("ui_left", "ui_right")
+		if input_dir * wall_normal.x < 0.0 and motion.y > WALL_SLIDE_SPEED:
+			motion.y = WALL_SLIDE_SPEED
+			$Sprite2D.play("jump")
 	
 	$Muzzle.look_at(get_global_mouse_position())
 	
@@ -80,28 +97,29 @@ func _physics_process(delta):
 		$Sprite2D.play("idle")
 	
 	if Input.is_action_pressed("ui_right"):
-		motion.x = min(motion.x + acceleration, max_speed)	
-		$Sprite2D.flip_h = true
+		if wall_lock <= 0.0:
+			motion.x = min(motion.x + acceleration, max_speed)
+			face_right = true
+		$Sprite2D.flip_h = face_right
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = false
 		if !is_jumping: $Sprite2D.play("run")
 		$RayCast2D.rotation = 0
 		$RayCast2D/Weapon.flip_h = false
 		$Muzzle.position.x = 18
-		$Area2D/CollisionShape2D.position.x = 18.5
-		face_right = true
 	elif Input.is_action_pressed("ui_left"):
-		motion.x = max(motion.x - acceleration, -max_speed)
+		if wall_lock <= 0.0:
+			motion.x = max(motion.x - acceleration, -max_speed)
 	
 		if !is_jumping: $Sprite2D.play("run")
-		$Sprite2D.flip_h = false
+		if wall_lock <= 0.0:
+			face_right = false
+		$Sprite2D.flip_h = face_right
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = true
 		$RayCast2D.rotation = PI
 		$RayCast2D/Weapon.flip_h = true
 		$Muzzle.position.x = -18
-		$Area2D/CollisionShape2D.position.x = -17
-		face_right = false
 	else:
 		friction = true
 	
@@ -113,11 +131,11 @@ func _physics_process(delta):
 		coyote = COYOTE_TIME
 		is_jumping = false
 		jumps = 0
-		if friction == true:
+		if friction == true and wall_lock <= 0.0:
 			motion.x = lerp(motion.x, 0.0, 0.2)
 	else:
 		coyote -= delta
-		if friction == true:
+		if friction == true and wall_lock <= 0.0:
 			motion.x = lerp(motion.x, 0.0, 0.05)
 	
 	if Input.is_action_just_pressed("ui_up"):
@@ -126,7 +144,18 @@ func _physics_process(delta):
 		jump_buffer -= delta
 	
 	if jump_buffer > 0.0:
-		if coyote > 0.0:
+		if wall_normal != Vector2.ZERO and wall_lock <= 0.0:
+			motion.y = jump_force
+			motion.x = signf(wall_normal.x) * WALL_JUMP_PUSH
+			jumps = 1
+			is_jumping = true
+			wall_lock = WALL_JUMP_LOCK
+			jump_buffer = 0.0
+			coyote = 0.0
+			face_right = wall_normal.x > 0.0
+			$Sprite2D.flip_h = face_right
+			$Sprite2D.play("jump")
+		elif coyote > 0.0:
 			$Sprite2D.play("jump")
 			is_jumping = true
 			motion.y = jump_force
@@ -154,20 +183,6 @@ func _physics_process(delta):
 	hud_time.text = "Time: %ds" % int(global.time)
 	hud_deaths.text = "Deaths: %d" % global.deaths
 	
-	var bodies = $Area2D.get_overlapping_bodies()
-	
-	if global.wall_jump:
-		for body in bodies:
-			if body.name == "TileMap":
-				if Input.is_action_just_pressed("ui_up"):
-					motion.y = jump_force * .7
-					if face_right:
-						motion.x -= 300
-					else:
-						motion.x += 300
-					jumps += 1
-				if friction == true:
-					motion.x = lerp(motion.x, 0.0, 0.2)
 
 
 func _ready():
@@ -248,6 +263,10 @@ func die():
 	global.deaths += 1
 	global.add_shake(8.0)
 	get_tree().reload_current_scene()
+
+func show_toast(text):
+	hud_toast.text = text
+	hud_toast.modulate.a = 1.0
 
 func update_hud():
 	if hud_hearts == null:
