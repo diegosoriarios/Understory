@@ -10,3 +10,5 @@ func _ready():
 
 func open():
 	$CollisionShape2D.scale = Vector2.ZERO
+	if has_node("Sprite2D"):
+		$Sprite2D.visible = false

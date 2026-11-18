@@ -22,6 +22,7 @@ TILE = 32
 SCENES = {
     "player": "res://Objects/Player.tscn",
     "tileset": "res://Assets/JungleDirtTileSet.tres",
+    "stone_tileset": "res://Assets/StoneTileSet.tres",
     "portal": "res://Objects/NextLevel.tscn",
     "spawner": "res://Objects/Spwaner.tscn",
     "key": "res://Objects/Chave.tscn",
@@ -31,6 +32,7 @@ SCENES = {
     "mover": "res://EnemyH.tscn",
     "doublejump": "res://Objects/DoubleJumpPickup.tscn",
     "walljump": "res://Objects/WallJumpPickup.tscn",
+    "backdrop": "res://Objects/Backdrop.tscn",
     "W": "res://Objects/Enemies/Walker.tscn",
     "F": "res://Objects/Enemies/Fly1.tscn",
     "G": "res://Objects/Enemies/Fly2.tscn",
@@ -56,7 +58,25 @@ SYM_TO_KEY = {
 
 # tile id -> atlas coords in JungleDirtTileSet
 TILE_CAP, TILE_FILL, TILE_PLAT = 4, 9, 1
-ATLAS = {TILE_CAP: (5, 5), TILE_FILL: (0, 5), TILE_PLAT: (1, 3)}
+# grass-topped ground cap: left end, middle, right end
+CAP_ATLAS = [(0, 1), (1, 1), (2, 1)]
+ATLAS = {TILE_FILL: (4, 5), TILE_PLAT: (1, 3)}
+
+# background props: texture, z_index, optional atmospheric tint
+DECOR = {
+    "tree": ("res://Assets/Sprites/Assets/decor/tree.png", -2, (0.88, 0.95, 0.88)),
+    "pine": ("res://Assets/Sprites/Assets/decor/pine.png", -1, (0.94, 1.0, 0.94)),
+    "rock": ("res://Assets/Sprites/Assets/decor/rock.png", -1, None),
+    "boulder": ("res://Assets/Sprites/Assets/decor/boulder.png", -1, None),
+    "hedge": ("res://Assets/Sprites/Assets/decor/hedge.png", -1, None),
+    "mossrock": ("res://Assets/Sprites/Assets/decor/mossrock.png", -1, None),
+}
+
+
+def png_size(res_path):
+    with open(ROOT / res_path[len("res://"):], "rb") as f:
+        head = f.read(24)
+    return struct.unpack(">II", head[16:24])
 
 NAME_BY_SYMBOL = {
     "W": "Walker", "F": "Fly1", "G": "Fly2", "1": "Enemy1", "2": "Enemy2",
@@ -96,6 +116,14 @@ LEVELS = [
             ("S", 34, 11),
             ("W", 42, 11),
             ("N", 53, 11),
+        ],
+        "decor": [
+            ("tree", 20, False),
+            ("pine", 44, True),
+            ("rock", 6, False),
+            ("hedge", 32, False),
+            ("boulder", 50, False),
+            ("mossrock", 26, False),
         ],
         "spawners": [(["W"], 1)],
         "boss": None,
@@ -138,6 +166,15 @@ LEVELS = [
             ("D", 61, 13),
             ("N", 62, 13),
         ],
+        "decor": [
+            ("tree", 8, False),
+            ("tree", 34, True),
+            ("pine", 22, True),
+            ("rock", 47, False),
+            ("hedge", 12, False),
+            ("mossrock", 28, False),
+            ("boulder", 58, False),
+        ],
         "spawners": [(["1", "3"], 2)],
         "boss": None,
     },
@@ -178,6 +215,14 @@ LEVELS = [
             ("D", 59, 15),
             ("N", 61, 15),
         ],
+        "decor": [
+            ("tree", 2, False),
+            ("pine", 6, True),
+            ("mossrock", 12, False),
+            ("rock", 48, False),
+            ("boulder", 52, False),
+            ("tree", 60, True),
+        ],
         "spawners": [(["F", "G"], 2)],
         "boss": None,
     },
@@ -212,8 +257,15 @@ LEVELS = [
             ("D", 44, 11),
             ("N", 46, 11),
         ],
+        "decor": [
+            ("rock", 8, False),
+            ("boulder", 20, False),
+            ("mossrock", 32, False),
+            ("rock", 42, True),
+        ],
         "spawners": [],
         "boss": "B1",
+        "stone": True,
     },
     {
         # ---------------- 5. BOSS 2 ARENA ----------------
@@ -247,8 +299,15 @@ LEVELS = [
             ("D", 52, 13),
             ("N", 54, 13),
         ],
+        "decor": [
+            ("rock", 6, False),
+            ("boulder", 24, True),
+            ("mossrock", 36, False),
+            ("rock", 48, False),
+        ],
         "spawners": [],
         "boss": "B2",
+        "stone": True,
     },
     {
         # ---------------- 6. BOSS 3 FINALE ----------------
@@ -283,8 +342,15 @@ LEVELS = [
             ("D", 52, 15),
             ("N", 54, 15),
         ],
+        "decor": [
+            ("rock", 6, False),
+            ("boulder", 22, True),
+            ("mossrock", 34, False),
+            ("rock", 46, False),
+        ],
         "spawners": [(["5", "9"], 2)],
         "boss": "B3",
+        "stone": True,
     },
 ]
 
@@ -312,8 +378,17 @@ def build_level(spec):
         for c, ch in enumerate(line):
             if ch == "#":
                 above = rows[r - 1][c] if r > 0 else "."
-                tid = TILE_CAP if above in ".L" else TILE_FILL
-                ax, ay = ATLAS[tid]
+                if above in ".L":
+                    left = rows[r][c - 1] if c > 0 else "."
+                    right = rows[r][c + 1] if c + 1 < width else "."
+                    if right != "#":
+                        ax, ay = CAP_ATLAS[2]
+                    elif left != "#":
+                        ax, ay = CAP_ATLAS[0]
+                    else:
+                        ax, ay = CAP_ATLAS[1]
+                else:
+                    ax, ay = ATLAS[TILE_FILL]
                 cells.append((c, r, ax, ay))
             elif ch == "=":
                 ax, ay = ATLAS[TILE_PLAT]
@@ -322,7 +397,10 @@ def build_level(spec):
                 lava_cells.append((c, r))
 
     # --- ext resources ---
-    used_keys = ["player", "tileset", "portal", "spawner", "key", "door"]
+    tileset_key = "stone_tileset" if spec.get("stone") else "tileset"
+    used_keys = ["player", "tileset", "portal", "spawner", "key", "door", "backdrop"]
+    if spec.get("stone"):
+        used_keys.append("stone_tileset")
     ent_syms = {s for s, _, _ in spec["entities"] if s not in "MB"}
     for s in ent_syms:
         used_keys.append(SYM_TO_KEY.get(s, s))
@@ -332,17 +410,24 @@ def build_level(spec):
         used_keys.append("lava")
     if spec["boss"]:
         used_keys.append(spec["boss"])
+    for kind, _, _ in spec.get("decor", []):
+        used_keys.append("decor_" + kind)
     # dedupe preserving order
     seen = set()
     ext = []
     for key in used_keys:
-        if key not in seen:
-            seen.add(key)
-            ext.append((key, SCENES[key]))
-    ext_ids = {key: i + 1 for i, (key, _) in enumerate(ext)}
+        if key in seen:
+            continue
+        seen.add(key)
+        if key.startswith("decor_"):
+            ext.append((key, DECOR[key[len("decor_"):]][0], "Texture2D"))
+        else:
+            is_tileset = key in ("tileset", "stone_tileset")
+            ext.append((key, SCENES[key], "TileSet" if is_tileset else "PackedScene"))
+    ext_ids = {key: i + 1 for i, (key, _, _) in enumerate(ext)}
     ext_lines = [
-        f'[ext_resource path="{path}" type="{"TileSet" if key == "tileset" else "PackedScene"}" id={ext_ids[key]}]'
-        for key, path in ext
+        f'[ext_resource path="{path}" type="{res_type}" id={ext_ids[key]}]'
+        for key, path, res_type in ext
     ]
 
     nodes = []
@@ -397,6 +482,26 @@ def build_level(spec):
             f"position = Vector2( {px}, {py} )\n"
         )
 
+    for i, (kind, col, flip) in enumerate(spec.get("decor", []), 1):
+        path, z, tint = DECOR[kind]
+        w, h = png_size(path)
+        row = next((r for r in range(height) if rows[r][col] == "#"), None)
+        assert row is not None, f"{spec['path']}: decor {kind} at ({col}) not above ground"
+        px = col * TILE + TILE // 2 - w // 2
+        py = row * TILE - h + 8
+        node = (
+            f'[node name="Decor{kind.title()}{i}" type="Sprite2D" parent="."]\n'
+            f"position = Vector2( {px}, {py} )\n"
+            f"z_index = {z}\n"
+            "centered = false\n"
+        )
+        if flip:
+            node += "flip_h = true\n"
+        if tint:
+            node += f"modulate = Color( {tint[0]}, {tint[1]}, {tint[2]}, 1 )\n"
+        node += f"texture = ExtResource( {ext_ids['decor_' + kind]} )\n"
+        nodes.append(node)
+
     tile_bytes = encode_cells(cells)
     tile_text = ", ".join(map(str, tile_bytes))
 
@@ -404,11 +509,16 @@ def build_level(spec):
     m = next(e for e in spec["entities"] if e[0] == "M")
     px, py = cell_center(m[1], m[2])
     nodes.insert(0, f'[node name="Player" parent="." instance=ExtResource( {ext_ids["player"]} )]\nposition = Vector2( {px}, {py} )\ncollision_layer = 2049\ncollision_mask = 2049\n')
-    nodes.insert(1, f'[node name="TileMap" type="TileMapLayer" parent="."]\ntile_set = ExtResource( {ext_ids["tileset"]} )\ntile_map_data = PackedByteArray({tile_text})\n')
+    nodes.insert(1, f'[node name="TileMap" type="TileMapLayer" parent="."]\ntile_set = ExtResource( {ext_ids[tileset_key]} )\ntile_map_data = PackedByteArray({tile_text})\n')
     nodes.insert(2, f'[node name="initPos" type="Marker2D" parent="."]\nposition = Vector2( {px}, {py} )\n')
     nodes.insert(3, (
         '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]\n'
         "environment = SubResource( 1 )\n"
+    ))
+    ground_y = next(r * TILE for r in range(height) if rows[r][0] == "#")
+    nodes.insert(4, (
+        f'[node name="Backdrop" parent="." instance=ExtResource( {ext_ids["backdrop"]} )]\n'
+        f"ground_y = {ground_y}\n"
     ))
 
     load_steps = len(ext) + 1 + 1  # ext resources + environment sub_resource + scene

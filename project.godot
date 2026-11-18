@@ -76,3 +76,7 @@ shoot={
 2d_physics/layer_1="world"
 2d_physics/layer_5="bullets"
 2d_physics/layer_12="player"
+
+[rendering]
+
+environment/defaults/default_clear_color=Color(0.05, 0.12, 0.08, 1)
