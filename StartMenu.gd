@@ -3,6 +3,10 @@ extends Control
 const Sfx = preload("res://Scripts/Sfx.gd")
 
 
+func _ready() -> void:
+	$CenterContainer/VBoxContainer/StartGame.grab_focus()
+
+
 func _on_StartGame_pressed():
 	Sfx.play("ui")
 	global.time = 0

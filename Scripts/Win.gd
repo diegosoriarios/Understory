@@ -4,6 +4,7 @@ const Sfx = preload("res://Scripts/Sfx.gd")
 
 func _ready():
 	Sfx.play("win")
+	$CenterContainer/VBoxContainer/Menu.grab_focus()
 	$CenterContainer/VBoxContainer/Stats.text = "Time: %d s    Deaths: %d" % [int(global.time), global.deaths]
 
 func _on_Menu_pressed():

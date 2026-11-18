@@ -29,6 +29,10 @@ var hp = MAX_HP
 var coyote = 0.0
 var jump_buffer = 0.0
 var wall_lock = 0.0
+var aim_dir := Vector2.RIGHT
+var aim_from_pad := false
+var gun_right := true
+var last_mouse_screen := Vector2.ZERO
 
 @onready var hud_hearts: Label = $HUD/Hearts
 @onready var hud_time: Label = $HUD/Time
@@ -76,7 +80,7 @@ func _physics_process(delta):
 			motion.y = WALL_SLIDE_SPEED
 			$Sprite2D.play("jump")
 	
-	$Muzzle.look_at(get_global_mouse_position())
+	_update_aim()
 	
 	if crouch:
 		$CollisionShape2D.scale.y = stand.y / 2
@@ -86,10 +90,10 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("shoot"):
 		shoot()
 	
-	if Input.is_action_pressed("ui_down"):
+	if Input.is_action_pressed("crouch"):
 		crouch = true
 	
-	if Input.is_action_just_released("ui_down"):
+	if Input.is_action_just_released("crouch"):
 		crouch = false
 	
 	if !is_jumping: $Sprite2D.play("idle")
@@ -102,12 +106,7 @@ func _physics_process(delta):
 			motion.x = min(motion.x + acceleration, max_speed)
 			face_right = true
 		$Sprite2D.flip_h = face_right
-		$Muzzle/icon.flip_h = false
-		$Muzzle/icon.flip_v = false
 		if !is_jumping: $Sprite2D.play("run")
-		$RayCast2D.rotation = 0
-		$RayCast2D/Weapon.flip_h = false
-		$Muzzle.position.x = 18
 	elif Input.is_action_pressed("ui_left"):
 		if wall_lock <= 0.0:
 			motion.x = max(motion.x - acceleration, -max_speed)
@@ -116,16 +115,11 @@ func _physics_process(delta):
 		if wall_lock <= 0.0:
 			face_right = false
 		$Sprite2D.flip_h = face_right
-		$Muzzle/icon.flip_h = false
-		$Muzzle/icon.flip_v = true
-		$RayCast2D.rotation = PI
-		$RayCast2D/Weapon.flip_h = true
-		$Muzzle.position.x = -18
 	else:
 		friction = true
 	
 	if global.has_wings:
-		if Input.is_action_pressed("ui_up"):
+		if Input.is_action_pressed("jump"):
 			motion.y = jump_force
 	
 	if is_on_floor():
@@ -139,7 +133,7 @@ func _physics_process(delta):
 		if friction == true and wall_lock <= 0.0:
 			motion.x = lerp(motion.x, 0.0, 0.05)
 	
-	if Input.is_action_just_pressed("ui_up"):
+	if Input.is_action_just_pressed("jump"):
 		jump_buffer = JUMP_BUFFER_TIME
 	else:
 		jump_buffer -= delta
@@ -219,6 +213,37 @@ func setup_camera_limits():
 		cam.limit_top = rect.position.y * ts.y - 200
 		cam.limit_right = (rect.position.x + rect.size.x) * ts.x
 		cam.limit_bottom = (rect.position.y + rect.size.y) * ts.y
+
+func _update_aim() -> void:
+	var stick := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down", 0.3)
+	var mouse_screen := get_viewport().get_mouse_position()
+	var mouse_moved := mouse_screen.distance_to(last_mouse_screen) > 0.5
+	last_mouse_screen = mouse_screen
+	var pad_active := stick.length() > 0.3
+	if pad_active:
+		aim_dir = stick.normalized()
+		aim_from_pad = true
+	elif aim_from_pad and not mouse_moved:
+		pass
+	else:
+		aim_from_pad = false
+		var to_mouse := get_global_mouse_position() - global_position
+		if to_mouse.length() > 2.0:
+			aim_dir = to_mouse.normalized()
+	if absf(aim_dir.x) > 0.12:
+		gun_right = aim_dir.x > 0.0
+	$Muzzle.rotation = aim_dir.angle()
+	$Muzzle.position.x = 18.0 if gun_right else -18.0
+	$Muzzle/icon.flip_v = not gun_right
+	$Muzzle/icon.flip_h = false
+	$RayCast2D.rotation = 0.0 if gun_right else PI
+	$RayCast2D/Weapon.flip_h = not gun_right
+	var reticle := get_node_or_null("Reticle") as Sprite2D
+	if reticle:
+		reticle.visible = pad_active
+		if pad_active:
+			reticle.global_position = global_position + aim_dir * 110.0
+
 
 func shoot():
 	if gun == 0:

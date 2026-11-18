@@ -33,11 +33,11 @@ func _physics_process(_delta: float) -> bool:
 		2:
 			if player.is_on_wall():
 				_check(true, "player reached the wall by walking")
-				Input.action_press("ui_up")
+				Input.action_press("jump")
 				_go(3)
 		3:
 			if stage_frames >= 2:
-				Input.action_release("ui_up")
+				Input.action_release("jump")
 				_check(player.wall_lock <= 0.0, "ground jump next to a wall is not a wall jump")
 				_check(player.motion.y < -300.0, "ground jump still uses full jump force")
 				_go(4)
@@ -47,10 +47,10 @@ func _physics_process(_delta: float) -> bool:
 				_check(player.motion.y <= WALL_SLIDE_SPEED + 0.01,
 					"falling against the wall is capped at wall-slide speed")
 				_check(player.jumps == 1, "wall slide keeps the air jump available")
-				Input.action_press("ui_up")
+				Input.action_press("jump")
 				_go(5)
 		5:
-			Input.action_release("ui_up")
+			Input.action_release("jump")
 			_go(6)
 		6:
 			if stage_frames >= 2:
@@ -61,10 +61,10 @@ func _physics_process(_delta: float) -> bool:
 				_check(player.wall_lock > 0.0, "wall jump locks steering briefly")
 				Input.action_release("ui_right")
 				g.double_jump_active = true
-				Input.action_press("ui_up")
+				Input.action_press("jump")
 				_go(7)
 		7:
-			Input.action_release("ui_up")
+			Input.action_release("jump")
 			_go(8)
 		8:
 			if stage_frames >= 2:
@@ -117,7 +117,7 @@ func _build_world() -> void:
 func _finish() -> void:
 	Input.action_release("ui_right")
 	Input.action_release("ui_left")
-	Input.action_release("ui_up")
+	Input.action_release("jump")
 	if world != null:
 		world.free()
 	print("RESULT: ", "PASS" if passed else "FAIL")
