@@ -1,10 +1,10 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var Bullet = preload('res://Objects/BulletEnemy2.tscn')
 var timer
 var allow_attack = true
 var direction = 0
-export var bullets = 3
+@export var bullets = 3
 var frame = 0
 var player
 
@@ -24,19 +24,19 @@ func _process(delta):
 		
 		timer = Timer.new()
 		timer.wait_time = 2
-		timer.connect("timeout", self, "on_timer_timeout")
+		timer.connect("timeout", Callable(self, "on_timer_timeout"))
 		add_child(timer)
 		timer.start()
 
 func shoot():
 	var deg = 15/bullets
 	if bullets == 1:
-		var bullet = Bullet.instance()
+		var bullet = Bullet.instantiate()
 		bullet.start(self.position)
 		get_parent().add_child(bullet)
 	else:
 		for i in range(bullets):
-			var bullet = Bullet.instance()
+			var bullet = Bullet.instantiate()
 			bullet.start(self.position)
 			get_parent().add_child(bullet)
 

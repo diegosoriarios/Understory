@@ -1,4 +1,4 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 const UP = Vector2(0, -1)
 var motion = Vector2()
@@ -8,9 +8,9 @@ var jump_force = -400
 var acceleration = 50
 var max_speed = 200
 var jumps = 0
-export(String, FILE, "*.tscn") var next_level
+@export var next_level # (String, FILE, "*.tscn")
 var gun = 1
-var take_damage setget set_take_damage
+var take_damage : set = set_take_damage
 var frame = 0
 var crouch = false
 var stand
@@ -28,11 +28,11 @@ func _process(delta):
 	if int(animation) == 8:
 		animation = 0
 	
-	$Sprite.frame = int(animation)
+	$Sprite2D.frame = int(animation)
 	
 	if take_damage:
 		frame += delta * 10
-		$Sprite.visible = false if int(frame) % 2 == 0 else true
+		$Sprite2D.visible = false if int(frame) % 2 == 0 else true
 		if (int(frame) >= 10): on_timer_timeout()
 	
 	if stabbing:
@@ -66,17 +66,17 @@ func _physics_process(delta):
 	if Input.is_action_just_released("ui_down"):
 		crouch = false
 	
-	if !is_jumping: $Sprite.play("idle")
+	if !is_jumping: $Sprite2D.play("idle")
 	
 	if Input.is_action_just_released("ui_right") or Input.is_action_just_released("ui_left"):
-		$Sprite.play("idle")
+		$Sprite2D.play("idle")
 	
 	if Input.is_action_pressed("ui_right"):
 		motion.x = min(motion.x + acceleration, max_speed)	
-		$Sprite.flip_h = true
+		$Sprite2D.flip_h = true
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = false
-		if !is_jumping: $Sprite.play("run")
+		if !is_jumping: $Sprite2D.play("run")
 		#$RayCast2D.rotation = 180
 		$RayCast2D/Weapon.flip_h = false
 		$Muzzle.position.x = 18
@@ -85,8 +85,8 @@ func _physics_process(delta):
 	elif Input.is_action_pressed("ui_left"):
 		motion.x = max(motion.x - acceleration, -max_speed)
 	
-		if !is_jumping: $Sprite.play("run")
-		$Sprite.flip_h = false
+		if !is_jumping: $Sprite2D.play("run")
+		$Sprite2D.flip_h = false
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = true
 		$RayCast2D.rotation = 180
@@ -106,7 +106,7 @@ func _physics_process(delta):
 		is_jumping = false
 		jumps = 0
 		if Input.is_action_just_pressed("ui_up"):
-			$Sprite.play("jump")
+			$Sprite2D.play("jump")
 			is_jumping = true
 			motion.y = jump_force
 			jumps += 1
@@ -116,16 +116,19 @@ func _physics_process(delta):
 		if Input.is_action_just_pressed("ui_up") and jumps < 2 and global.double_jump_active == true:
 			motion.y = jump_force
 			is_jumping = true
-			$Sprite.play("jump")
+			$Sprite2D.play("jump")
 			jumps += 1
 		if friction == true:
 			motion.x = lerp(motion.x, 0, 0.05)
 	
-	motion = move_and_slide(motion, UP)
+	set_velocity(motion)
+	set_up_direction(UP)
+	move_and_slide()
+	motion = velocity
 	
-	$Sprite/Label.text = str(int(global.time))
-	$Sprite/Label2.text = str(global.deaths)
-	$Sprite/Label3.text = str(global.totalTime)
+	$Sprite2D/Label.text = str(int(global.time))
+	$Sprite2D/Label2.text = str(global.deaths)
+	$Sprite2D/Label3.text = str(global.totalTime)
 	
 	#if global.time >= global.totalTime:
 	#	global.time = 0
@@ -150,8 +153,8 @@ func _physics_process(delta):
 
 
 func _ready():
-	$Sprite.play("idle")
-	var startPosition = get_parent().find_node("initPos").position
+	$Sprite2D.play("idle")
+	var startPosition = get_parent().find_child("initPos").position
 	position = startPosition
 	if global.xPos != 0 and global.yPos != 0:
 		motion.x = global.xPos
@@ -159,7 +162,10 @@ func _ready():
 		get_node(".").motion.x = global.xPos
 		get_node(".").motion.y = global.yPos
 		
-	motion = move_and_slide(motion, UP)
+	set_velocity(motion)
+	set_up_direction(UP)
+	move_and_slide()
+	motion = velocity
 	
 	stand = $CollisionShape2D.scale
 
@@ -181,22 +187,22 @@ func shoot():
 		var coll = $RayCast2D.get_collider()
 		check_colision(coll)
 	elif gun == 1:
-		var bullet = Bullet.instance()
-		bullet.start($Muzzle.global_position, $Muzzle.rotation, self)
+		var bullet = Bullet.instantiate()
+		bullet.start(Callable($Muzzle.global_position, $Muzzle.rotation).bind(self))
 		get_parent().add_child(bullet)
 	elif gun == 2:
-		var bullet1 = Bullet.instance()
-		var bullet2 = Bullet.instance()
-		var bullet3 = Bullet.instance()
-		bullet1.start($Muzzle.global_position, $Muzzle.rotation, self)
-		bullet2.start($Muzzle.global_position, $Muzzle.rotation + deg2rad(15), self)
-		bullet3.start($Muzzle.global_position, $Muzzle.rotation - deg2rad(15), self)
+		var bullet1 = Bullet.instantiate()
+		var bullet2 = Bullet.instantiate()
+		var bullet3 = Bullet.instantiate()
+		bullet1.start(Callable($Muzzle.global_position, $Muzzle.rotation).bind(self))
+		bullet2.start(Callable($Muzzle.global_position, $Muzzle.rotation + deg_to_rad(15)).bind(self))
+		bullet3.start(Callable($Muzzle.global_position, $Muzzle.rotation - deg_to_rad(15)).bind(self))
 		get_parent().add_child(bullet1)
 		get_parent().add_child(bullet2)
 		get_parent().add_child(bullet3)
 
 func on_timer_timeout():
-	$Sprite.visible = true
+	$Sprite2D.visible = true
 	frame = 0
 	set_take_damage(false)
 

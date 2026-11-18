@@ -1,6 +1,6 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
-export (int) var speed = 200
+@export var speed: int = 200
 
 var velocity = Vector2()
 var direction = 1
@@ -13,7 +13,7 @@ var max_speed = 200
 var hp = 3
 
 func _ready():
-	add_collision_exception_with(get_parent().find_node("Player"))
+	add_collision_exception_with(get_parent().find_child("Player"))
 
 
 func _process(delta):
@@ -28,14 +28,17 @@ func _process(delta):
 	else:
 		motion.x = max(motion.x - acceleration, -max_speed)
 	
-	motion = move_and_slide(motion, UP)
+	set_velocity(motion)
+	set_up_direction(UP)
+	move_and_slide()
+	motion = velocity
 
 func hit():
 	hp -= 1
 	if hp == 0:
-		var file = "res://Assets/Sprites/Blood/" + str(int(rand_range(0, 43)))	 + ".png"
+		var file = "res://Assets/Sprites/Blood/" + str(int(randf_range(0, 43)))	 + ".png"
 		var texture = load(file)
-		var sprite = Sprite.new()
+		var sprite = Sprite2D.new()
 		sprite.set_texture(texture)
 		sprite.position = position
 		sprite.z_index = -3

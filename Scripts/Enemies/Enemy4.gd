@@ -1,7 +1,7 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var direction = 0
-export var bullets = 1
+@export var bullets = 1
 var speed = 200
 var timer
 var allow_attack = true
@@ -21,7 +21,9 @@ func _process(delta):
 	velocity = Vector2.ZERO
 	if player:
 		velocity = position.direction_to(player.position) * run_speed
-	velocity = move_and_slide(velocity)
+	set_velocity(velocity)
+	move_and_slide()
+	velocity = velocity
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -34,7 +36,7 @@ func _process(delta):
 		allow_attack = false
 		timer = Timer.new()
 		timer.wait_time = 2
-		timer.connect("timeout", self, "on_timer_timeout")
+		timer.connect("timeout", Callable(self, "on_timer_timeout"))
 		add_child(timer)
 		timer.start()
 
@@ -44,8 +46,8 @@ func hit():
 func shoot():
 	var deg = 360/bullets
 	for i in range(bullets):
-		var bullet = Bullet.instance()
-		bullet.start(self.position, $Area2D.rotation - deg2rad(deg * i) , self)
+		var bullet = Bullet.instantiate()
+		bullet.start(Callable(self.position, $Area2D.rotation - deg_to_rad(deg * i)).bind(self))
 		get_parent().add_child(bullet)
 
 func on_timer_timeout():

@@ -3,7 +3,7 @@ extends Area2D
 var speed = 50
 var frame = 0
 var direction = 1
-var v_max = rand_range(20, 40)
+var v_max = randf_range(20, 40)
 var hp = 1
 
 func _ready():

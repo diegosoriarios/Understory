@@ -1,11 +1,11 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var timer
 var allow_attack = true
 var direction = 0
-export var bullets = 1
-var hp = int(rand_range(15, 20))
+@export var bullets = 1
+var hp = int(randf_range(15, 20))
 
 func _ready():
 	randomize()
@@ -28,21 +28,21 @@ func _process(delta):
 		
 		timer = Timer.new()
 		timer.wait_time = 1
-		timer.connect("timeout", self, "on_timer_timeout")
+		timer.connect("timeout", Callable(self, "on_timer_timeout"))
 		add_child(timer)
 		timer.start()
 
 func shoot():
 	var deg = 15/bullets
 	if bullets == 1:
-		var bullet = Bullet.instance()
-		bullet.start(self.position, deg2rad(-90 * direction), self)
+		var bullet = Bullet.instantiate()
+		bullet.start(Callable(self.position, deg_to_rad(-90 * direction)).bind(self))
 		get_parent().add_child(bullet)
 	else:
 		for i in range(bullets):
-			var bullet = Bullet.instance()
+			var bullet = Bullet.instantiate()
 			var index = (90 * direction) + (deg * (i - 1))
-			bullet.start(self.position, deg2rad(index), self)
+			bullet.start(Callable(self.position, deg_to_rad(index)).bind(self))
 			get_parent().add_child(bullet)
 
 func on_timer_timeout():

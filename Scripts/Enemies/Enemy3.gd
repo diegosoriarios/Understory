@@ -1,13 +1,13 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var direction = 0
-export var bullets = 1
+@export var bullets = 1
 var speed = 200
 
 var run_speed = 25
 var velocity = Vector2.ZERO
 var player
-var hp = int(rand_range(15, 20))
+var hp = int(randf_range(15, 20))
 
 func _ready():
 	randomize()
@@ -18,7 +18,9 @@ func _process(delta):
 	velocity = Vector2.ZERO
 	if player:
 		velocity = position.direction_to(player.position) * run_speed
-	velocity = move_and_slide(velocity)
+	set_velocity(velocity)
+	move_and_slide()
+	velocity = velocity
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	

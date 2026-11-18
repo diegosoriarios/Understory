@@ -1,4 +1,4 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var speed = 500
 var velocity = Vector2()
@@ -17,10 +17,10 @@ var random
 func start(pos):
 	randomize()
 	position = pos
-	random = Vector2(rand_range(-5, 5), 0)
+	random = Vector2(randf_range(-5, 5), 0)
 	target = position + random
 	gravity = -10
-	rotation = deg2rad(-90)
+	rotation = deg_to_rad(-90)
 
 func _physics_process(delta):
 	motion.y += gravity
@@ -28,12 +28,12 @@ func _physics_process(delta):
 	var friction = false
 	if random.x > 0:
 		if rotation < 90:
-			rotation += deg2rad(2)
+			rotation += deg_to_rad(2)
 		if position.x < target.x:
 			motion.x += 8
 	else:
 		if rotation < 270:
-			rotation -= deg2rad(2)
+			rotation -= deg_to_rad(2)
 		if position.x > target.x:
 			motion.x -= 8
 	
@@ -52,7 +52,10 @@ func _physics_process(delta):
 			body.set_take_damage(true)
 			queue_free()
 	
-	motion = move_and_slide(motion, UP)
+	set_velocity(motion)
+	set_up_direction(UP)
+	move_and_slide()
+	motion = velocity
 
 func _on_VisibilityNotifier2D_screen_exited():
 	queue_free()

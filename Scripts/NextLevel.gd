@@ -14,4 +14,4 @@ func _physics_process(delta):
 			next_level.shuffle()
 			var first = next_level.front()
 			#var level = first.instance()
-			get_tree().change_scene(first)
+			get_tree().change_scene_to_file(first)

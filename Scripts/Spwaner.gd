@@ -1,8 +1,8 @@
 extends Node2D
 
-export(Array, PackedScene) var enemies = []
-export var time = 20
-export var limit = 0
+@export var enemies = [] # (Array, PackedScene)
+@export var time = 20
+@export var limit = 0
 
 var frame = 0
 var create_enemy = true
@@ -30,6 +30,6 @@ func generate(delta):
 		frame = 0
 		enemies.shuffle()
 		var Enemy = enemies.front()
-		var enemy = Enemy.instance()
+		var enemy = Enemy.instantiate()
 		enemy.position = self.position
 		get_parent().add_child(enemy)

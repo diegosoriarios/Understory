@@ -1,9 +1,9 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var speed = 500
 var velocity = Vector2()
 
-var explosion = preload("res://Objects/Explosion.tscn").instance()
+var explosion = preload("res://Objects/Explosion.tscn").instantiate()
 var camera
 var init_pos
 
@@ -15,7 +15,7 @@ func start(pos, dir, ignore):
 	velocity = Vector2(speed, 0).rotated(rotation)
 
 func _process(delta):
-	camera = get_parent().find_node("Player").find_node("Camera2D")
+	camera = get_parent().find_child("Player").find_child("Camera2D")
 	#print(camera.get_viewport().get_visible_rect().size.x)
 	#print(position.x)
 	

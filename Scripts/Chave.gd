@@ -3,7 +3,7 @@ extends Area2D
 var door
 
 func _ready():
-	door = get_parent().find_node("Door")
+	door = get_parent().find_child("Door")
 
 
 func _process(delta):

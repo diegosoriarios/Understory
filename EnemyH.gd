@@ -1,4 +1,4 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 const UP = Vector2(0, -1)
 var time = 0
@@ -19,7 +19,10 @@ func _physics_process(delta):
 		time = 0
 		isGoingRight = !isGoingRight
 	
-	motion = move_and_slide(motion, UP)
+	set_velocity(motion)
+	set_up_direction(UP)
+	move_and_slide()
+	motion = velocity
 	
 func _ready():
 	pass # Replace with function body.
