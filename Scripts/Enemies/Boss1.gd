@@ -55,6 +55,8 @@ func shoot():
 			bullet.start(self.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 			get_parent().add_child(bullet)
 
+const BulletKey = preload("res://Objects/Chave.tscn")
+
 func hit():
 	hp -= 1
 	
@@ -63,4 +65,7 @@ func hit():
 	elif hp == 15:
 		forma = 3
 	elif hp == 0:
+		var key = BulletKey.instantiate()
+		key.position = position
+		get_parent().add_child(key)
 		queue_free()

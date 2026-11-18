@@ -45,13 +45,15 @@ func _process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 	
-	if int(frame) % 1 == 0 and int(frame) != 0:
+	if int(frame) % 20 == 0 and int(frame) != 0:
 		allow_attack = true
 	
 	if allow_attack:
 		shoot()
 		allow_attack = false
 		frame = 0
+
+const BulletKey = preload("res://Objects/Chave.tscn")
 
 func hit():
 	hp -= 1
@@ -61,6 +63,9 @@ func hit():
 	elif hp == 20:
 		forma = 3
 	elif hp == 0:
+		var key = BulletKey.instantiate()
+		key.position = position
+		get_parent().add_child(key)
 		queue_free()
 
 func shoot():

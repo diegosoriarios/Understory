@@ -8,7 +8,9 @@ var allow_attack = true
 
 var run_speed = 25
 var player
+var hp = 50
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
+const BulletKey = preload("res://Objects/Chave.tscn")
 
 func _ready():
 	player = get_parent().get_node("Player")
@@ -32,13 +34,22 @@ func _process(delta):
 		shoot()
 		allow_attack = false
 		timer = Timer.new()
-		timer.wait_time = .1
+		timer.wait_time = 1.0
 		timer.timeout.connect(on_timer_timeout)
 		add_child(timer)
 		timer.start()
 
 func hit():
-	pass
+	hp -= 1
+	
+	if hp == 25:
+		bullets = 24
+		run_speed = 40
+	elif hp == 0:
+		var key = BulletKey.instantiate()
+		key.position = position
+		get_parent().add_child(key)
+		queue_free()
 
 func shoot():
 	var deg = 360/bullets
