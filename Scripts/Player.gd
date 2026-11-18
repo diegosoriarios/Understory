@@ -202,13 +202,6 @@ func setup_camera_limits():
 		cam.limit_bottom = (rect.position.y + rect.size.y) * ts.y
 
 func shoot():
-	var dir = Vector2(1, 0).rotated($Muzzle.global_rotation) 
-	var kick = 5
-	var kickdirection = kick * (dir*-1)
-	velocity = velocity + kickdirection
-	position += velocity * gun
-	velocity = Vector2()
-
 	if gun == 0:
 		stabbing = true
 		$RayCast2D.enabled = true
