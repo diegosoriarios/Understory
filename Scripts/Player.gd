@@ -24,7 +24,6 @@ var is_jumping
 var hp = MAX_HP
 var coyote = 0.0
 var jump_buffer = 0.0
-var shake = 0.0
 
 @onready var hud_hearts: Label = $HUD/Hearts
 @onready var hud_time: Label = $HUD/Time
