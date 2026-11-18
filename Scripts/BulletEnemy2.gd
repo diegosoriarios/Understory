@@ -21,7 +21,13 @@ func start(pos):
 	gravity = -10
 	rotation = deg_to_rad(-90)
 
+var life = 4.0
+
 func _physics_process(delta):
+	life -= delta
+	if life <= 0.0:
+		queue_free()
+		return
 	motion.y += gravity
 	gravity += .35
 	var friction = false
@@ -55,6 +61,3 @@ func _physics_process(delta):
 	up_direction = UP
 	move_and_slide()
 	motion = velocity
-
-func _on_VisibilityNotifier2D_screen_exited():
-	queue_free()

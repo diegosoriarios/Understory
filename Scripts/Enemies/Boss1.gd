@@ -20,6 +20,10 @@ func _process(delta):
 	$Area2D.look_at(player.get_position())
 	position.y = yPos
 	
+	for body in $Area2D.get_overlapping_bodies():
+		if body.name == "Player" and body.has_method("set_take_damage"):
+			body.set_take_damage(true)
+	
 	frame += delta * 10
 	
 	if int(frame) % 10 == 0 and int(frame) != 0:
@@ -65,6 +69,7 @@ func hit():
 	elif hp == 15:
 		forma = 3
 	elif hp == 0:
+		global.add_shake(10.0)
 		var key = BulletKey.instantiate()
 		key.position = position
 		get_parent().add_child(key)

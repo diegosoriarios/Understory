@@ -49,7 +49,6 @@ func img():
 	for n in range(25):
 		var node = objNode.instantiate()
 		node.set_texture(texture)
-		print(node)
 		obj.append(node)
 		obj[n].set_frame(n)
 		add_child(obj[n])

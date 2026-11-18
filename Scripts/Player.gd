@@ -1,6 +1,9 @@
 extends CharacterBody2D
 
 const UP = Vector2(0, -1)
+const MAX_HP = 3
+const COYOTE_TIME = 0.09
+const JUMP_BUFFER_TIME = 0.1
 var motion = Vector2()
 var speed = 200
 var gravity = 10
@@ -18,7 +21,14 @@ var face_right = true
 var stabbing = false
 var animation = 0
 var is_jumping
+var hp = MAX_HP
+var coyote = 0.0
+var jump_buffer = 0.0
+var shake = 0.0
 
+@onready var hud_hearts: Label = $HUD/Hearts
+@onready var hud_time: Label = $HUD/Time
+@onready var hud_deaths: Label = $HUD/Deaths
 
 var Bullet = preload('res://Objects/Bullet.tscn')
 
@@ -76,7 +86,7 @@ func _physics_process(delta):
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = false
 		if !is_jumping: $Sprite2D.play("run")
-		#$RayCast2D.rotation = 180
+		$RayCast2D.rotation = 0
 		$RayCast2D/Weapon.flip_h = false
 		$Muzzle.position.x = 18
 		$Area2D/CollisionShape2D.position.x = 18.5
@@ -88,7 +98,7 @@ func _physics_process(delta):
 		$Sprite2D.flip_h = false
 		$Muzzle/icon.flip_h = false
 		$Muzzle/icon.flip_v = true
-		$RayCast2D.rotation = 180
+		$RayCast2D.rotation = PI
 		$RayCast2D/Weapon.flip_h = true
 		$Muzzle.position.x = -18
 		$Area2D/CollisionShape2D.position.x = -17
@@ -101,39 +111,49 @@ func _physics_process(delta):
 			motion.y = jump_force
 	
 	if is_on_floor():
-		#$Sprite.play("idle")
+		coyote = COYOTE_TIME
 		is_jumping = false
 		jumps = 0
-		if Input.is_action_just_pressed("ui_up"):
-			$Sprite2D.play("jump")
-			is_jumping = true
-			motion.y = jump_force
-			jumps += 1
 		if friction == true:
 			motion.x = lerp(motion.x, 0.0, 0.2)
 	else:
-		if Input.is_action_just_pressed("ui_up") and jumps < 2 and global.double_jump_active == true:
+		coyote -= delta
+		if friction == true:
+			motion.x = lerp(motion.x, 0.0, 0.05)
+	
+	if Input.is_action_just_pressed("ui_up"):
+		jump_buffer = JUMP_BUFFER_TIME
+	else:
+		jump_buffer -= delta
+	
+	if jump_buffer > 0.0:
+		if coyote > 0.0:
+			$Sprite2D.play("jump")
+			is_jumping = true
+			motion.y = jump_force
+			jumps = 1
+			jump_buffer = 0.0
+			coyote = 0.0
+		elif jumps < 2 and global.double_jump_active == true and not is_on_floor():
 			motion.y = jump_force
 			is_jumping = true
 			$Sprite2D.play("jump")
 			jumps += 1
-		if friction == true:
-			motion.x = lerp(motion.x, 0.0, 0.05)
+			jump_buffer = 0.0
 	
 	velocity = motion
 	up_direction = UP
 	move_and_slide()
 	motion = velocity
 	
-	$Sprite2D/Label.text = str(int(global.time))
-	$Sprite2D/Label2.text = str(global.deaths)
-	$Sprite2D/Label3.text = str(global.totalTime)
+	if global.shake > 0.0:
+		$Camera2D.offset = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * global.shake
+		global.shake = maxf(global.shake - delta * 30.0, 0.0)
+		if global.shake == 0.0:
+			$Camera2D.offset = Vector2.ZERO
 	
-	#if global.time >= global.totalTime:
-	#	global.time = 0
-	#	global.deaths += 1
-	#	global.totalTime = (global.deaths + 1) * 10
-	#	get_tree().reload_current_scene()
+	hud_time.text = "Time: %ds" % int(global.time)
+	hud_deaths.text = "Deaths: %d" % global.deaths
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -168,6 +188,19 @@ func _ready():
 	motion = velocity
 	
 	stand = $CollisionShape2D.scale
+	update_hud()
+	setup_camera_limits()
+
+func setup_camera_limits():
+	var tilemap = get_parent().find_child("TileMap")
+	if tilemap is TileMapLayer and tilemap.tile_set != null:
+		var rect = tilemap.get_used_rect()
+		var ts = tilemap.tile_set.tile_size
+		var cam = $Camera2D
+		cam.limit_left = rect.position.x * ts.x
+		cam.limit_top = rect.position.y * ts.y - 200
+		cam.limit_right = (rect.position.x + rect.size.x) * ts.x
+		cam.limit_bottom = (rect.position.y + rect.size.y) * ts.y
 
 func shoot():
 	var dir = Vector2(1, 0).rotated($Muzzle.global_rotation) 
@@ -207,12 +240,29 @@ func on_timer_timeout():
 	set_take_damage(false)
 
 func set_take_damage(new_value):
+	if new_value and not take_damage and hp > 0:
+		hp -= 1
+		global.add_shake(3.0)
+		update_hud()
+		if hp <= 0:
+			die()
+			return
 	take_damage = new_value
 
 func hit():
-	pass
+	set_take_damage(true)
+
+func die():
+	global.deaths += 1
+	global.add_shake(8.0)
+	get_tree().reload_current_scene()
+
+func update_hud():
+	if hud_hearts == null:
+		return
+	var filled = max(hp, 0)
+	hud_hearts.text = "♥".repeat(filled) + "♡".repeat(MAX_HP - filled)
 
 func check_colision(coll):
 	if $RayCast2D.is_colliding() and coll.is_in_group("enemy"):
-		print(coll.name)
 		coll.hit()

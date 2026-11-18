@@ -7,6 +7,7 @@
 radius = 33.5708
 
 [sub_resource type="RectangleShape2D" id=2]
+size = Vector2( 50, 60 )
 
 [node name="Boss1" type="CharacterBody2D" groups=[
 "enemy",

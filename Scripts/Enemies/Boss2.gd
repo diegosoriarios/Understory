@@ -63,6 +63,7 @@ func hit():
 	elif hp == 20:
 		forma = 3
 	elif hp == 0:
+		global.add_shake(10.0)
 		var key = BulletKey.instantiate()
 		key.position = position
 		get_parent().add_child(key)

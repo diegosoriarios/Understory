@@ -244,30 +244,6 @@ frames = SubResource( 25 )
 animation = "jump"
 offset = Vector2( -2.26681, -2.14133 )
 
-[node name="Label" type="Label" parent="Sprite2D"]
-offset_left = 256.0
-offset_top = -160.0
-offset_right = 296.0
-offset_bottom = -146.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label2" type="Label" parent="Sprite2D"]
-offset_left = 256.0
-offset_top = -128.0
-offset_right = 296.0
-offset_bottom = -114.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label3" type="Label" parent="Sprite2D"]
-offset_left = 256.0
-offset_top = -96.0
-offset_right = 296.0
-offset_bottom = -82.0
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 26 )
 
@@ -277,6 +253,31 @@ current = true
 drag_vertical_enabled = true
 drag_top_margin = 0.5
 drag_bottom_margin = 0.0
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Hearts" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 240.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 28
+
+[node name="Time" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 44.0
+offset_right = 220.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 18
+
+[node name="Deaths" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 70.0
+offset_right = 220.0
+offset_bottom = 96.0
+theme_override_font_sizes/font_size = 18
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2( 10, -3 )

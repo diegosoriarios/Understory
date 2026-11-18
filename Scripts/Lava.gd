@@ -16,5 +16,5 @@ func _process(delta):
 	var areas = $Area2D.get_overlapping_bodies()
 	
 	for area in areas:
-		if area.name == "Player":
-			area.hit()
+		if area.name == "Player" and area.has_method("set_take_damage"):
+			area.set_take_damage(true)

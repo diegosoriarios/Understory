@@ -10,6 +10,11 @@ var can_attack = false
 
 func _ready():
 	randomize()
+	timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 1
+	timer.timeout.connect(on_timer_timeout)
+	add_child(timer)
 	
 func _process(delta):
 	#var player = get_parent().get_node("Player").get_position()
@@ -29,10 +34,6 @@ func _process(delta):
 		shoot()
 		allow_attack = false
 		
-		timer = Timer.new()
-		timer.wait_time = 1
-		timer.timeout.connect(on_timer_timeout)
-		add_child(timer)
 		timer.start()
 
 func shoot():
@@ -49,11 +50,7 @@ func shoot():
 			get_parent().add_child(bullet)
 
 func on_timer_timeout():
-	if timer and timer.time_left != 0:
-		allow_attack = true
-		remove_child(timer)
-		timer.stop()
-		timer = null
+	allow_attack = true
 
 
 func hit():

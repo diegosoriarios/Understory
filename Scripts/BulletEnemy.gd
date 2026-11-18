@@ -7,7 +7,13 @@ func start(pos, dir, ignore, speed = 500):
 	position = pos
 	velocity = Vector2(speed, 0).rotated(rotation)
 
+var life = 4.0
+
 func _physics_process(delta):
+	life -= delta
+	if life <= 0.0:
+		queue_free()
+		return
 	var collision = move_and_collide(velocity * delta)
 	if collision:
 		velocity = velocity.bounce(collision.get_normal())
@@ -22,6 +28,3 @@ func _physics_process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 			queue_free()
-
-func _on_VisibilityNotifier2D_screen_exited():
-	queue_free()

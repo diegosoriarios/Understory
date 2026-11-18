@@ -15,6 +15,11 @@ const BulletKey = preload("res://Objects/Chave.tscn")
 func _ready():
 	player = get_parent().get_node("Player")
 	velocity = position.direction_to(player.position) * speed
+	timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 1.0
+	timer.timeout.connect(on_timer_timeout)
+	add_child(timer)
 	
 func _process(delta):
 	$Area2D.look_at(player.get_position())
@@ -33,10 +38,6 @@ func _process(delta):
 	if allow_attack:
 		shoot()
 		allow_attack = false
-		timer = Timer.new()
-		timer.wait_time = 1.0
-		timer.timeout.connect(on_timer_timeout)
-		add_child(timer)
 		timer.start()
 
 func hit():
@@ -46,6 +47,7 @@ func hit():
 		bullets = 24
 		run_speed = 40
 	elif hp == 0:
+		global.add_shake(10.0)
 		var key = BulletKey.instantiate()
 		key.position = position
 		get_parent().add_child(key)

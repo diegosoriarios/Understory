@@ -29,7 +29,11 @@ func _process(_delta: float) -> bool:
 		if key != null:
 			# Free the "Player" name so the fake body keeps it (Chave checks body.name).
 			level.get_node("Player").name = "RealPlayer"
+			var fake_script := GDScript.new()
+			fake_script.source_code = "extends StaticBody2D\nfunc set_take_damage(_v):\n\tpass\n"
+			fake_script.reload()
 			var fake := StaticBody2D.new()
+			fake.set_script(fake_script)
 			fake.name = "Player"
 			var cs := CollisionShape2D.new()
 			var sh := RectangleShape2D.new()

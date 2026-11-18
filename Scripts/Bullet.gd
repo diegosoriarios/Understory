@@ -3,8 +3,8 @@ extends CharacterBody2D
 var speed = 500
 
 var explosion = preload("res://Objects/Explosion.tscn").instantiate()
-var camera
 var init_pos
+var life = 4.0
 
 func start(pos, dir, ignore):
 	rotation = dir
@@ -13,13 +13,11 @@ func start(pos, dir, ignore):
 	init_pos = pos
 	velocity = Vector2(speed, 0).rotated(rotation)
 
-func _process(delta):
-	camera = get_parent().find_child("Player").find_child("Camera2D")
-	#print(camera.get_viewport().get_visible_rect().size.x)
-	#print(position.x)
-	
-
 func _physics_process(delta):
+	life -= delta
+	if life <= 0.0:
+		queue_free()
+		return
 	var collision = move_and_collide(velocity * delta)
 	if collision:
 		velocity = velocity.bounce(collision.get_normal())
@@ -52,6 +50,3 @@ func _physics_process(delta):
 			area.add_child(explosion)
 			area.hit()
 			queue_free()
-
-func _on_VisibilityNotifier2D_screen_exited():
-	queue_free()

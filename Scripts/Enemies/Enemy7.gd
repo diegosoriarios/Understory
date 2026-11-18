@@ -18,6 +18,11 @@ const UP = Vector2(0, -1)
 
 func _ready():
 	player = get_parent().get_node("Player")
+	timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 2
+	timer.timeout.connect(on_timer_timeout)
+	add_child(timer)
 	sSize = self.scale
 	velocity = position.direction_to(player.position) * speed
 	
@@ -44,10 +49,6 @@ func _process(delta):
 	if allow_attack:
 		shoot()
 		allow_attack = false
-		timer = Timer.new()
-		timer.wait_time = 2
-		timer.timeout.connect(on_timer_timeout)
-		add_child(timer)
 		timer.start()
 
 	velocity = motion

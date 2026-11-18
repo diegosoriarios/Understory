@@ -8,3 +8,7 @@ var totalTime = (deaths + 1) * 10
 var time = 0
 var has_wings = false
 var wall_jump = false
+var shake = 0.0
+
+func add_shake(amount):
+	shake = maxf(shake, amount)
