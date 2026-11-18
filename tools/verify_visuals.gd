@@ -32,6 +32,7 @@ func _init() -> void:
 		check_level(path, node)
 		node.free()
 
+	check_enemies()
 	check_object_texture("res://Objects/NextLevel.tscn", "Portal")
 	check_object_texture("res://Objects/Door.tscn", "Door")
 	check_object_texture("res://Objects/Chave.tscn", "Key")
@@ -88,6 +89,23 @@ func check_level(path: String, node: Node) -> void:
 		if child.texture != null:
 			decor += 1
 	check(decor >= 3, "%s has decor sprites (%d)" % [path, decor])
+
+
+func check_enemies() -> void:
+	var scenes := {
+		"Walker": "walker", "Enemy1": "enemy1", "Enemy2": "enemy2", "Enemy3": "enemy3",
+		"Enemy4": "enemy4", "Enemy5": "enemy5", "Enemy7": "enemy7", "Enemy9": "enemy9",
+		"Enemy11": "enemy11", "Enemy12": "enemy12", "Fly1": "fly1", "Fly2": "fly2",
+		"Boss3": "boss3",
+	}
+	for scene in scenes:
+		var node = load("res://Objects/Enemies/%s.tscn" % scene).instantiate()
+		var sprite: Sprite2D = node.find_child("icon", true, false)
+		if sprite == null:
+			sprite = node.find_child("Sprite2D", true, false)
+		var tex_path := str(sprite.texture.resource_path) if sprite and sprite.texture else ""
+		check(tex_path.ends_with("Drawn/%s.png" % scenes[scene]), "%s uses drawn art" % scene)
+		node.free()
 
 
 func check_object_texture(path: String, label: String) -> void:

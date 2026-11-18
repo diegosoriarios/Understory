@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scripts/Enemies/Boss3.gd" type="Script" id=1]
-[ext_resource path="res://icon.png" type="Texture2D" id=2]
+[ext_resource path="res://Assets/Sprites/Enemies/Drawn/boss3.png" type="Texture2D" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 59.9999, 59 )
