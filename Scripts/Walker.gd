@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 @export var speed: int = 200
 
 var direction = 1
@@ -33,6 +35,7 @@ func _process(delta):
 	motion = velocity
 
 func hit():
+	Sfx.play("hit")
 	hp -= 1
 	if hp == 0:
 		var file = "res://Assets/Sprites/Blood/" + str(int(randf_range(0, 43)))	 + ".png"
@@ -42,4 +45,5 @@ func hit():
 		sprite.position = position
 		sprite.z_index = -3
 		get_parent().add_child(sprite)
+		Sfx.play("explosion")
 		queue_free()

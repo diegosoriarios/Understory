@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 var direction = 0
 @export var bullets = 16
 var speed = 200
@@ -41,6 +43,7 @@ func _process(delta):
 		timer.start()
 
 func hit():
+	Sfx.play("bosshit")
 	hp -= 1
 	
 	if hp == 25:
@@ -51,6 +54,7 @@ func hit():
 		var key = BulletKey.instantiate()
 		key.position = position
 		get_parent().add_child(key)
+		Sfx.play("explosion")
 		queue_free()
 
 func shoot():

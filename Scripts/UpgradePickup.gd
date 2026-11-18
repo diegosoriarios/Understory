@@ -1,5 +1,7 @@
 extends Area2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 const TOASTS = {
 	"double_jump": "Double jump unlocked! Jump again in the air.",
 	"wall_jump": "Wall jump unlocked! Jump while sliding on a wall.",
@@ -25,6 +27,7 @@ func _process(delta):
 			return
 
 func grant(player):
+	Sfx.play("pickup")
 	global.set(FLAGS.get(upgrade, upgrade), true)
 	if player.has_method("show_toast"):
 		player.show_toast(TOASTS.get(upgrade, "Upgrade unlocked!"))

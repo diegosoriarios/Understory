@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 var direction = 0
 @export var bullets = 1
 var speed = 200
@@ -26,7 +28,9 @@ func _process(delta):
 			body.set_take_damage(true)
 
 func hit():
+	Sfx.play("hit")
 	hp -= 1
 	
 	if hp == 0:
+		Sfx.play("explosion")
 		queue_free()

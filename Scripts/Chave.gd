@@ -1,5 +1,7 @@
 extends Area2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 var door
 
 func _ready():
@@ -11,5 +13,6 @@ func _process(delta):
 	
 	for body in bodies:
 		if body.name == "Player":
+			Sfx.play("key")
 			door.open()
 			queue_free()

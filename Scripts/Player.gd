@@ -1,5 +1,6 @@
 extends CharacterBody2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
 const UP = Vector2(0, -1)
 const MAX_HP = 3
 const COYOTE_TIME = 0.09
@@ -155,8 +156,10 @@ func _physics_process(delta):
 			face_right = wall_normal.x > 0.0
 			$Sprite2D.flip_h = face_right
 			$Sprite2D.play("jump")
+			Sfx.play("walljump")
 		elif coyote > 0.0:
 			$Sprite2D.play("jump")
+			Sfx.play("jump")
 			is_jumping = true
 			motion.y = jump_force
 			jumps = 1
@@ -166,6 +169,7 @@ func _physics_process(delta):
 			motion.y = jump_force
 			is_jumping = true
 			$Sprite2D.play("jump")
+			Sfx.play("jump", 1.18)
 			jumps += 1
 			jump_buffer = 0.0
 	
@@ -218,6 +222,7 @@ func setup_camera_limits():
 
 func shoot():
 	if gun == 0:
+		Sfx.play("walljump", 1.4)
 		stabbing = true
 		$RayCast2D.enabled = true
 		$RayCast2D.visible = true
@@ -227,10 +232,12 @@ func shoot():
 		var coll = $RayCast2D.get_collider()
 		check_colision(coll)
 	elif gun == 1:
+		Sfx.play("shoot")
 		var bullet = Bullet.instantiate()
 		bullet.start($Muzzle.global_position, $Muzzle.rotation, self)
 		get_parent().add_child(bullet)
 	elif gun == 2:
+		Sfx.play("shoot", 0.92)
 		var bullet1 = Bullet.instantiate()
 		var bullet2 = Bullet.instantiate()
 		var bullet3 = Bullet.instantiate()
@@ -249,6 +256,7 @@ func on_timer_timeout():
 func set_take_damage(new_value):
 	if new_value and not take_damage and hp > 0:
 		hp -= 1
+		Sfx.play("hurt")
 		global.add_shake(3.0)
 		update_hud()
 		if hp <= 0:
@@ -261,6 +269,7 @@ func hit():
 
 func die():
 	global.deaths += 1
+	Sfx.play("death")
 	global.add_shake(8.0)
 	get_tree().reload_current_scene()
 

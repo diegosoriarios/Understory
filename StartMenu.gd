@@ -1,7 +1,10 @@
 extends Control
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 
 func _on_StartGame_pressed():
+	Sfx.play("ui")
 	global.time = 0
 	global.deaths = 0
 	global.totalTime = 10
@@ -14,4 +17,5 @@ func _on_StartGame_pressed():
 	get_tree().change_scene_to_file("res://World.tscn")
 
 func _on_QuitGame_pressed():
+	Sfx.play("ui")
 	get_tree().quit()

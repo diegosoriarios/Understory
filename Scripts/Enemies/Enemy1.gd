@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var timer
 var allow_attack = true
@@ -54,7 +56,9 @@ func on_timer_timeout():
 
 
 func hit():
+	Sfx.play("hit")
 	hp -= 1
 	
 	if hp == 0:
+		Sfx.play("explosion")
 		queue_free()

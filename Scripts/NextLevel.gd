@@ -1,5 +1,7 @@
 extends Area2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 @export var target_scene: String = ""
 
 var next_level = [
@@ -12,6 +14,7 @@ func _physics_process(delta):
 	
 	for body in bodies:
 		if body.name == "Player":
+			Sfx.play("levelclear")
 			if target_scene != "":
 				get_tree().change_scene_to_file(target_scene)
 				return
