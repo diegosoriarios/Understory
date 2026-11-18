@@ -1,7 +1,6 @@
 extends CharacterBody2D
 
 var speed = 500
-var velocity = Vector2()
 
 const UP = Vector2(0, -1)
 var motion = Vector2()
@@ -39,9 +38,9 @@ func _physics_process(delta):
 	
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		velocity = velocity.bounce(collision.normal)
-		if collision.collider.has_method("hit"):
-			collision.collider.hit()
+		velocity = velocity.bounce(collision.get_normal())
+		if collision.get_collider().has_method("hit"):
+			collision.get_collider().hit()
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -52,8 +51,8 @@ func _physics_process(delta):
 			body.set_take_damage(true)
 			queue_free()
 	
-	set_velocity(motion)
-	set_up_direction(UP)
+	velocity = motion
+	up_direction = UP
 	move_and_slide()
 	motion = velocity
 

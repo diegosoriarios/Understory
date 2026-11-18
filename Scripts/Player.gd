@@ -8,7 +8,7 @@ var jump_force = -400
 var acceleration = 50
 var max_speed = 200
 var jumps = 0
-@export var next_level # (String, FILE, "*.tscn")
+@export var next_level: String = ""
 var gun = 1
 var take_damage : set = set_take_damage
 var frame = 0
@@ -18,7 +18,6 @@ var face_right = true
 var stabbing = false
 var animation = 0
 var is_jumping
-var velocity = Vector2()
 
 
 var Bullet = preload('res://Objects/Bullet.tscn')
@@ -111,7 +110,7 @@ func _physics_process(delta):
 			motion.y = jump_force
 			jumps += 1
 		if friction == true:
-			motion.x = lerp(motion.x, 0, 0.2)
+			motion.x = lerp(motion.x, 0.0, 0.2)
 	else:
 		if Input.is_action_just_pressed("ui_up") and jumps < 2 and global.double_jump_active == true:
 			motion.y = jump_force
@@ -119,10 +118,10 @@ func _physics_process(delta):
 			$Sprite2D.play("jump")
 			jumps += 1
 		if friction == true:
-			motion.x = lerp(motion.x, 0, 0.05)
+			motion.x = lerp(motion.x, 0.0, 0.05)
 	
-	set_velocity(motion)
-	set_up_direction(UP)
+	velocity = motion
+	up_direction = UP
 	move_and_slide()
 	motion = velocity
 	
@@ -149,21 +148,22 @@ func _physics_process(delta):
 						motion.x += 300
 					jumps += 1
 				if friction == true:
-					motion.x = lerp(motion.x, 0, 0.2)
+					motion.x = lerp(motion.x, 0.0, 0.2)
 
 
 func _ready():
 	$Sprite2D.play("idle")
-	var startPosition = get_parent().find_child("initPos").position
-	position = startPosition
+	var initPos = get_parent().find_child("initPos")
+	if initPos != null:
+		position = initPos.position
 	if global.xPos != 0 and global.yPos != 0:
 		motion.x = global.xPos
 		motion.y = global.yPos
 		get_node(".").motion.x = global.xPos
 		get_node(".").motion.y = global.yPos
 		
-	set_velocity(motion)
-	set_up_direction(UP)
+	velocity = motion
+	up_direction = UP
 	move_and_slide()
 	motion = velocity
 	
@@ -188,15 +188,15 @@ func shoot():
 		check_colision(coll)
 	elif gun == 1:
 		var bullet = Bullet.instantiate()
-		bullet.start(Callable($Muzzle.global_position, $Muzzle.rotation).bind(self))
+		bullet.start($Muzzle.global_position, $Muzzle.rotation, self)
 		get_parent().add_child(bullet)
 	elif gun == 2:
 		var bullet1 = Bullet.instantiate()
 		var bullet2 = Bullet.instantiate()
 		var bullet3 = Bullet.instantiate()
-		bullet1.start(Callable($Muzzle.global_position, $Muzzle.rotation).bind(self))
-		bullet2.start(Callable($Muzzle.global_position, $Muzzle.rotation + deg_to_rad(15)).bind(self))
-		bullet3.start(Callable($Muzzle.global_position, $Muzzle.rotation - deg_to_rad(15)).bind(self))
+		bullet1.start($Muzzle.global_position, $Muzzle.rotation, self)
+		bullet2.start($Muzzle.global_position, $Muzzle.rotation + deg_to_rad(15), self)
+		bullet3.start($Muzzle.global_position, $Muzzle.rotation - deg_to_rad(15), self)
 		get_parent().add_child(bullet1)
 		get_parent().add_child(bullet2)
 		get_parent().add_child(bullet3)

@@ -31,7 +31,7 @@ func _process(delta):
 		
 		timer = Timer.new()
 		timer.wait_time = 1
-		timer.connect("timeout", Callable(self, "on_timer_timeout"))
+		timer.timeout.connect(on_timer_timeout)
 		add_child(timer)
 		timer.start()
 
@@ -39,13 +39,13 @@ func shoot():
 	var deg = 15/bullets
 	if bullets == 1:
 		var bullet = Bullet.instantiate()
-		bullet.start(Callable(self.position, deg_to_rad(180 * direction)).bind(self))
+		bullet.start(self.position, deg_to_rad(180 * direction), self)
 		get_parent().add_child(bullet)
 	else:
 		for i in range(bullets):
 			var bullet = Bullet.instantiate()
 			var index = (180 * direction) + (deg * (i - 1))
-			bullet.start(Callable(self.position, deg_to_rad(index)).bind(self))
+			bullet.start(self.position, deg_to_rad(index), self)
 			get_parent().add_child(bullet)
 
 func on_timer_timeout():

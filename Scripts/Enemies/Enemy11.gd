@@ -6,7 +6,6 @@ var speed = 500
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var frame = 0
@@ -63,8 +62,8 @@ func _process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 
-	set_velocity(motion)
-	set_up_direction(Vector2.ZERO)
+	velocity = motion
+	up_direction = Vector2.ZERO
 	move_and_slide()
 	motion = velocity
 

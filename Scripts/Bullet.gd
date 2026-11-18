@@ -1,7 +1,6 @@
 extends CharacterBody2D
 
 var speed = 500
-var velocity = Vector2()
 
 var explosion = preload("res://Objects/Explosion.tscn").instantiate()
 var camera
@@ -23,9 +22,9 @@ func _process(delta):
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		velocity = velocity.bounce(collision.normal)
-		if collision.collider.has_method("hit"):
-			collision.collider.hit()
+		velocity = velocity.bounce(collision.get_normal())
+		if collision.get_collider().has_method("hit"):
+			collision.get_collider().hit()
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	var areas = $Area2D.get_overlapping_areas()

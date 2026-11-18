@@ -30,8 +30,8 @@ func _process(delta):
 			motion.x += gravity
 		else:
 			motion.x -= gravity
-		set_velocity(motion)
-		set_up_direction(UP)
+		velocity = motion
+		up_direction = UP
 		move_and_slide()
 		motion = velocity
 	elif forma == 3:
@@ -46,13 +46,13 @@ func shoot():
 	if forma == 3:
 		for i in 10:
 			var bullet = Bullet.instantiate()
-			bullet.start(Callable(self.position, $Area2D.rotation - deg_to_rad(i * 15)).bind(self), 150)
+			bullet.start(self.position, $Area2D.rotation - deg_to_rad(i * 15), self, 150)
 			get_parent().add_child(bullet)
 	else:
 		var deg = 360/bullets
 		for i in range(bullets):
 			var bullet = Bullet.instantiate()
-			bullet.start(Callable(self.position, $Area2D.rotation - deg_to_rad(deg * i)).bind(self))
+			bullet.start(self.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 			get_parent().add_child(bullet)
 
 func hit():

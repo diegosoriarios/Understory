@@ -5,7 +5,6 @@ var direction = 0
 var speed = 200
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var hp = int(randf_range(15, 20))
 
@@ -18,9 +17,7 @@ func _process(delta):
 	velocity = Vector2.ZERO
 	if player:
 		velocity = position.direction_to(player.position) * run_speed
-	set_velocity(velocity)
 	move_and_slide()
-	velocity = velocity
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	

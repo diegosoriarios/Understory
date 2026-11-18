@@ -19,8 +19,8 @@ func _physics_process(delta):
 		time = 0
 		isGoingRight = !isGoingRight
 	
-	set_velocity(motion)
-	set_up_direction(UP)
+	velocity = motion
+	up_direction = UP
 	move_and_slide()
 	motion = velocity
 	

@@ -1,6 +1,5 @@
 extends CharacterBody2D
 
-var velocity = Vector2()
 
 func start(pos, dir, ignore, speed = 500):
 	rotation = dir
@@ -11,9 +10,9 @@ func start(pos, dir, ignore, speed = 500):
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		velocity = velocity.bounce(collision.normal)
-		if collision.collider.has_method("hit"):
-			collision.collider.hit()
+		velocity = velocity.bounce(collision.get_normal())
+		if collision.get_collider().has_method("hit"):
+			collision.get_collider().hit()
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	

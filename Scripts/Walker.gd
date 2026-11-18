@@ -2,7 +2,6 @@ extends CharacterBody2D
 
 @export var speed: int = 200
 
-var velocity = Vector2()
 var direction = 1
 const UP = Vector2(0, -1)
 var motion = Vector2()
@@ -28,8 +27,8 @@ func _process(delta):
 	else:
 		motion.x = max(motion.x - acceleration, -max_speed)
 	
-	set_velocity(motion)
-	set_up_direction(UP)
+	velocity = motion
+	up_direction = UP
 	move_and_slide()
 	motion = velocity
 

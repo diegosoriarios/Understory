@@ -7,7 +7,6 @@ var timer
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var frame = 0
@@ -49,7 +48,7 @@ func _process(delta):
 		allow_attack = false
 		timer = Timer.new()
 		timer.wait_time = 2
-		timer.connect("timeout", Callable(self, "on_timer_timeout"))
+		timer.timeout.connect(on_timer_timeout)
 		add_child(timer)
 		timer.start()
 
@@ -60,7 +59,7 @@ func shoot():
 	var deg = 360/bullets
 	for i in range(bullets):
 		var bullet = Bullet.instantiate()
-		bullet.start(Callable(self.position, $Area2D.rotation - deg_to_rad(deg * i)).bind(self))
+		bullet.start(self.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 		get_parent().add_child(bullet)
 
 func on_timer_timeout():

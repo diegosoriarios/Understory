@@ -24,7 +24,7 @@ func _process(delta):
 		
 		timer = Timer.new()
 		timer.wait_time = 2
-		timer.connect("timeout", Callable(self, "on_timer_timeout"))
+		timer.timeout.connect(on_timer_timeout)
 		add_child(timer)
 		timer.start()
 
