@@ -94,6 +94,7 @@ func _init() -> void:
 	var muzzle: Marker2D = player.get_node("Muzzle")
 	var gun: Sprite2D = player.get_node("Muzzle/icon")
 	var reticle: Sprite2D = player.get_node("Reticle")
+	var sprite: AnimatedSprite2D = player.get_node("Sprite2D")
 
 	for i in 60:
 		await physics_frame
@@ -130,6 +131,44 @@ func _init() -> void:
 	for i in 2:
 		await physics_frame
 	check(not reticle.visible, "reticle hides for mouse aim")
+
+	# --- aim-driven facing and backwards walking -------------------------
+	check(sprite.animation == "idle", "idle animation when standing still")
+	Input.action_press("aim_right", 1.0)
+	for i in 2:
+		await physics_frame
+	check(not sprite.flip_h, "aiming right faces the sprite right")
+	Input.action_press("ui_left")
+	for i in 8:
+		await physics_frame
+	check(player.motion.x < 0.0, "player can walk backwards while aiming right")
+	check(not sprite.flip_h, "walking left does not flip the sprite")
+	check(sprite.animation == "run", "running plays the run animation")
+	var first_frame := sprite.frame
+	var frame_changed := false
+	for i in 30:
+		await physics_frame
+		if sprite.frame != first_frame:
+			frame_changed = true
+			break
+	check(frame_changed, "run animation cycles its frames")
+	Input.action_release("ui_left")
+	Input.action_release("aim_right")
+
+	Input.action_press("aim_left", 1.0)
+	for i in 2:
+		await physics_frame
+	check(sprite.flip_h, "aiming left flips the sprite")
+	Input.action_press("ui_right")
+	for i in 8:
+		await physics_frame
+	check(player.motion.x > 0.0, "player can walk forwards while aiming left")
+	check(sprite.flip_h, "walking right does not flip the sprite")
+	Input.action_release("ui_right")
+	Input.action_release("aim_left")
+	for i in 2:
+		await physics_frame
+	check(sprite.animation == "idle", "idle returns after moving")
 
 	Input.action_press("jump")
 	for i in 3:

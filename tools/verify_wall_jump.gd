@@ -56,7 +56,6 @@ func _physics_process(_delta: float) -> bool:
 			if stage_frames >= 2:
 				_check(player.motion.y < -300.0, "wall jump restores full jump force")
 				_check(player.motion.x < 0.0, "wall jump pushes away from the right-side wall")
-				_check(player.face_right == false, "wall jump faces away from the wall")
 				_check(player.jumps == 1, "wall jump leaves one air jump")
 				_check(player.wall_lock > 0.0, "wall jump locks steering briefly")
 				Input.action_release("ui_right")

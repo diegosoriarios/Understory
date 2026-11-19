@@ -21,9 +21,7 @@ var take_damage : set = set_take_damage
 var frame = 0
 var crouch = false
 var stand
-var face_right = true
 var stabbing = false
-var animation = 0
 var is_jumping
 var hp = MAX_HP
 var coyote = 0.0
@@ -44,12 +42,6 @@ var Bullet = preload('res://Objects/Bullet.tscn')
 func _process(delta):
 	if hud_toast.modulate.a > 0.0:
 		hud_toast.modulate.a = maxf(hud_toast.modulate.a - delta * 0.5, 0.0)
-	
-	animation += .15
-	if int(animation) == 8:
-		animation = 0
-	
-	$Sprite2D.frame = int(animation)
 	
 	if take_damage:
 		frame += delta * 10
@@ -78,7 +70,7 @@ func _physics_process(delta):
 		var input_dir = Input.get_axis("ui_left", "ui_right")
 		if input_dir * wall_normal.x < 0.0 and motion.y > WALL_SLIDE_SPEED:
 			motion.y = WALL_SLIDE_SPEED
-			$Sprite2D.play("jump")
+			_play_anim("jump")
 	
 	_update_aim()
 	
@@ -96,26 +88,17 @@ func _physics_process(delta):
 	if Input.is_action_just_released("crouch"):
 		crouch = false
 	
-	if !is_jumping: $Sprite2D.play("idle")
-	
-	if Input.is_action_just_released("ui_right") or Input.is_action_just_released("ui_left"):
-		$Sprite2D.play("idle")
-	
 	if Input.is_action_pressed("ui_right"):
 		if wall_lock <= 0.0:
 			motion.x = min(motion.x + acceleration, max_speed)
-			face_right = true
-		$Sprite2D.flip_h = face_right
-		if !is_jumping: $Sprite2D.play("run")
+		if !is_jumping: _play_anim("run")
 	elif Input.is_action_pressed("ui_left"):
 		if wall_lock <= 0.0:
 			motion.x = max(motion.x - acceleration, -max_speed)
 	
-		if !is_jumping: $Sprite2D.play("run")
-		if wall_lock <= 0.0:
-			face_right = false
-		$Sprite2D.flip_h = face_right
+		if !is_jumping: _play_anim("run")
 	else:
+		if !is_jumping: _play_anim("idle")
 		friction = true
 	
 	if global.has_wings:
@@ -147,12 +130,10 @@ func _physics_process(delta):
 			wall_lock = WALL_JUMP_LOCK
 			jump_buffer = 0.0
 			coyote = 0.0
-			face_right = wall_normal.x > 0.0
-			$Sprite2D.flip_h = face_right
-			$Sprite2D.play("jump")
+			_play_anim("jump")
 			Sfx.play("walljump")
 		elif coyote > 0.0:
-			$Sprite2D.play("jump")
+			_play_anim("jump")
 			Sfx.play("jump")
 			is_jumping = true
 			motion.y = jump_force
@@ -162,7 +143,7 @@ func _physics_process(delta):
 		elif jumps < 2 and global.double_jump_active == true and not is_on_floor():
 			motion.y = jump_force
 			is_jumping = true
-			$Sprite2D.play("jump")
+			_play_anim("jump")
 			Sfx.play("jump", 1.18)
 			jumps += 1
 			jump_buffer = 0.0
@@ -184,7 +165,7 @@ func _physics_process(delta):
 
 
 func _ready():
-	$Sprite2D.play("idle")
+	_play_anim("idle")
 	var initPos = get_parent().find_child("initPos")
 	if initPos != null:
 		position = initPos.position
@@ -214,6 +195,10 @@ func setup_camera_limits():
 		cam.limit_right = (rect.position.x + rect.size.x) * ts.x
 		cam.limit_bottom = (rect.position.y + rect.size.y) * ts.y
 
+func _play_anim(anim: String) -> void:
+	if $Sprite2D.animation != anim or not $Sprite2D.is_playing():
+		$Sprite2D.play(anim)
+
 func _update_aim() -> void:
 	var stick := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down", 0.3)
 	var mouse_screen := get_viewport().get_mouse_position()
@@ -232,6 +217,7 @@ func _update_aim() -> void:
 			aim_dir = to_mouse.normalized()
 	if absf(aim_dir.x) > 0.12:
 		gun_right = aim_dir.x > 0.0
+	$Sprite2D.flip_h = not gun_right
 	$Muzzle.rotation = aim_dir.angle()
 	$Muzzle.position.x = 18.0 if gun_right else -18.0
 	$Muzzle/icon.flip_v = not gun_right

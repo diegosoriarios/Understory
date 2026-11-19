@@ -33,6 +33,7 @@ func _init() -> void:
 		node.free()
 
 	check_enemies()
+	check_player()
 	check_object_texture("res://Objects/NextLevel.tscn", "Portal")
 	check_object_texture("res://Objects/Door.tscn", "Door")
 	check_object_texture("res://Objects/Chave.tscn", "Key")
@@ -106,6 +107,25 @@ func check_enemies() -> void:
 		var tex_path := str(sprite.texture.resource_path) if sprite and sprite.texture else ""
 		check(tex_path.ends_with("Drawn/%s.png" % scenes[scene]), "%s uses drawn art" % scene)
 		node.free()
+
+
+func check_player() -> void:
+	var player = load("res://Objects/Player.tscn").instantiate()
+	var sprite: AnimatedSprite2D = player.get_node_or_null("Sprite2D")
+	check(sprite != null, "player has animated sprite")
+	if sprite:
+		var frames := sprite.sprite_frames
+		check(frames.has_animation("idle") and frames.get_frame_count("idle") == 1,
+			"player idle has one frame")
+		check(frames.has_animation("run") and frames.get_frame_count("run") == 2,
+			"player run has two frames")
+		check(frames.has_animation("jump") and frames.get_frame_count("jump") == 1,
+			"player jump has one frame")
+		var tex := str(frames.get_frame_texture("idle", 0).resource_path)
+		check(tex.contains("Assets/Sprites/Player/"), "player uses Kenney alien art")
+		check(is_equal_approx(sprite.scale.x, 0.3) and is_equal_approx(sprite.position.y, -16.2),
+			"player sprite scale and ground alignment")
+	player.free()
 
 
 func check_object_texture(path: String, label: String) -> void:
