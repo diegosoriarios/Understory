@@ -6,7 +6,7 @@ var motion = Vector2()
 var gravity = 100
 
 func _ready():
-	$Particles2D.emitting = true
+	$GPUParticles2D.emitting = true
 
 
 func _physics_process(delta):

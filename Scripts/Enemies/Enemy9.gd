@@ -1,13 +1,12 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var direction = 0
-export var bullets = 1
+@export var bullets = 1
 var speed = 100
 var timer
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var frame = 0
@@ -19,6 +18,11 @@ const UP = Vector2(0, -1)
 
 func _ready():
 	player = get_parent().get_node("Player")
+	timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 2
+	timer.timeout.connect(on_timer_timeout)
+	add_child(timer)
 	sSize = self.scale
 	velocity = position.direction_to(player.position) * speed
 	
@@ -45,13 +49,12 @@ func _process(delta):
 	if allow_attack:
 		shoot()
 		allow_attack = false
-		timer = Timer.new()
-		timer.wait_time = 2
-		timer.connect("timeout", self, "on_timer_timeout")
-		add_child(timer)
 		timer.start()
 
-	motion = move_and_slide(motion, UP)
+	velocity = motion
+	up_direction = UP
+	move_and_slide()
+	motion = velocity
 
 func hit():
 	pass
@@ -59,8 +62,8 @@ func hit():
 func shoot():
 	var deg = 360/bullets
 	for i in range(bullets):
-		var bullet = Bullet.instance()
-		bullet.start(self.position, $Area2D.rotation - deg2rad(deg * i) , self)
+		var bullet = Bullet.instantiate()
+		bullet.start(self.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 		get_parent().add_child(bullet)
 
 func on_timer_timeout():

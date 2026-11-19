@@ -1,9 +1,11 @@
 extends Area2D
 
+const Sfx = preload("res://Scripts/Sfx.gd")
+
 var speed = 50
 var frame = 0
 var direction = 1
-var v_max = rand_range(20, 40)
+var v_max = randf_range(20, 40)
 var hp = 1
 
 func _ready():
@@ -24,6 +26,8 @@ func _process(delta):
 			body.set_take_damage(true)
 
 func hit():
+	Sfx.play("hit")
 	hp -= 1
 	if hp == 0:
+		Sfx.play("explosion")
 		queue_free()

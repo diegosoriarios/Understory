@@ -1,11 +1,10 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var speed = 500
-var velocity = Vector2()
 
-var explosion = preload("res://Objects/Explosion.tscn").instance()
-var camera
+var explosion = preload("res://Objects/Explosion.tscn").instantiate()
 var init_pos
+var life = 4.0
 
 func start(pos, dir, ignore):
 	rotation = dir
@@ -14,18 +13,12 @@ func start(pos, dir, ignore):
 	init_pos = pos
 	velocity = Vector2(speed, 0).rotated(rotation)
 
-func _process(delta):
-	camera = get_parent().find_node("Player").find_node("Camera2D")
-	#print(camera.get_viewport().get_visible_rect().size.x)
-	#print(position.x)
-	
-
 func _physics_process(delta):
-	var collision = move_and_collide(velocity * delta)
-	if collision:
-		velocity = velocity.bounce(collision.normal)
-		if collision.collider.has_method("hit"):
-			collision.collider.hit()
+	life -= delta
+	if life <= 0.0:
+		queue_free()
+		return
+	position += velocity * delta
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	var areas = $Area2D.get_overlapping_areas()
@@ -53,6 +46,3 @@ func _physics_process(delta):
 			area.add_child(explosion)
 			area.hit()
 			queue_free()
-
-func _on_VisibilityNotifier2D_screen_exited():
-	queue_free()

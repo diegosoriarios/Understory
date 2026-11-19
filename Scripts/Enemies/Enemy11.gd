@@ -1,12 +1,11 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 var direction = 0
-export var bullets = 1
+@export var bullets = 1
 var speed = 500
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var frame = 0
@@ -19,7 +18,7 @@ var move = false
 
 func _ready():
 	randomize()
-	random = int(rand_range(0, 4))
+	random = int(randf_range(0, 4))
 	player = get_parent().get_node("Player")
 	sSize = self.scale
 	velocity = position.direction_to(player.position) * speed
@@ -43,7 +42,7 @@ func _process(delta):
 		motion.x = 0
 	
 	if move:
-		random = int(rand_range(0, 4))
+		random = int(randf_range(0, 4))
 		move = false
 	
 	if int(frame) % 20 == 0 and int(frame) != 0:
@@ -63,7 +62,10 @@ func _process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 
-	motion = move_and_slide(motion, Vector2.ZERO)
+	velocity = motion
+	up_direction = Vector2.ZERO
+	move_and_slide()
+	motion = velocity
 
 func hit():
 	pass

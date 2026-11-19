@@ -1,19 +1,27 @@
-extends KinematicBody2D
+extends CharacterBody2D
+
+const Sfx = preload("res://Scripts/Sfx.gd")
 
 var direction = 0
-export var bullets = 16
+@export var bullets = 16
 var speed = 200
 var timer
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
+var hp = 50
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
+const BulletKey = preload("res://Objects/Chave.tscn")
 
 func _ready():
 	player = get_parent().get_node("Player")
 	velocity = position.direction_to(player.position) * speed
+	timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 1.0
+	timer.timeout.connect(on_timer_timeout)
+	add_child(timer)
 	
 func _process(delta):
 	$Area2D.look_at(player.get_position())
@@ -21,7 +29,7 @@ func _process(delta):
 	velocity = Vector2.ZERO
 	if player:
 		velocity = position.direction_to(player.position) * run_speed
-	velocity = move_and_slide(velocity)
+	move_and_slide()
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -32,20 +40,28 @@ func _process(delta):
 	if allow_attack:
 		shoot()
 		allow_attack = false
-		timer = Timer.new()
-		timer.wait_time = .1
-		timer.connect("timeout", self, "on_timer_timeout")
-		add_child(timer)
 		timer.start()
 
 func hit():
-	pass
+	Sfx.play("bosshit")
+	hp -= 1
+	
+	if hp == 25:
+		bullets = 24
+		run_speed = 40
+	elif hp == 0:
+		global.add_shake(10.0)
+		var key = BulletKey.instantiate()
+		key.position = position
+		get_parent().add_child(key)
+		Sfx.play("explosion")
+		queue_free()
 
 func shoot():
 	var deg = 360/bullets
 	for i in range(bullets):
-		var bullet = Bullet.instance()
-		bullet.start(self.position, $Area2D.rotation - deg2rad(deg * i) , self)
+		var bullet = Bullet.instantiate()
+		bullet.start(self.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 		get_parent().add_child(bullet)
 
 func on_timer_timeout():

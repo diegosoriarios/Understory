@@ -1,13 +1,14 @@
-extends KinematicBody2D
+extends CharacterBody2D
+
+const Sfx = preload("res://Scripts/Sfx.gd")
 
 var direction = 0
-export var bullets = 16
+@export var bullets = 16
 var speed = 200
 var timer
 var allow_attack = true
 
 var run_speed = 25
-var velocity = Vector2.ZERO
 var player
 var Bullet = preload('res://Objects/BulletEnemy.tscn')
 var forma = 1
@@ -32,13 +33,13 @@ func _process(delta):
 		velocity = Vector2.ZERO
 		if player:
 			velocity = position.direction_to(player.position) * run_speed
-		velocity = move_and_slide(velocity)
+		move_and_slide()
 		position.y = yPos
 	elif forma == 3:
 		velocity = Vector2.ZERO
 		if player:
 			velocity = position.direction_to(player.position) * run_speed
-		velocity = move_and_slide(velocity)
+		move_and_slide()
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -46,7 +47,7 @@ func _process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 	
-	if int(frame) % 1 == 0 and int(frame) != 0:
+	if int(frame) % 20 == 0 and int(frame) != 0:
 		allow_attack = true
 	
 	if allow_attack:
@@ -54,7 +55,10 @@ func _process(delta):
 		allow_attack = false
 		frame = 0
 
+const BulletKey = preload("res://Objects/Chave.tscn")
+
 func hit():
+	Sfx.play("bosshit")
 	hp -= 1
 	
 	if hp == 45:
@@ -62,24 +66,29 @@ func hit():
 	elif hp == 20:
 		forma = 3
 	elif hp == 0:
+		global.add_shake(10.0)
+		var key = BulletKey.instantiate()
+		key.position = position
+		get_parent().add_child(key)
+		Sfx.play("explosion")
 		queue_free()
 
 func shoot():
 	if forma == 3:
-		var bullet = Bullet.instance()
-		bullet.start(self.position + $Horse.position, $Horse.rotation , self, 250)
+		var bullet = Bullet.instantiate()
+		bullet.start(self.position + $Horse.position, $Horse.rotation, self, 250)
 		get_parent().add_child(bullet)
-		bullet = Bullet.instance()
-		bullet.start(self.position + $Head.position, $Head.rotation , self, 250)
+		bullet = Bullet.instantiate()
+		bullet.start(self.position + $Head.position, $Head.rotation, self, 250)
 		get_parent().add_child(bullet)
-		bullet = Bullet.instance()
-		bullet.start(self.position + $Goat.position, $Goat.rotation , self, 250)
+		bullet = Bullet.instantiate()
+		bullet.start(self.position + $Goat.position, $Goat.rotation, self, 250)
 		get_parent().add_child(bullet)
 		
 	else:
 		var deg = 360/bullets
 		for i in range(bullets):
-			var bullet = Bullet.instance()
-			bullet.start(self.position + $Head.position, $Area2D.rotation - deg2rad(deg * i) , self)
+			var bullet = Bullet.instantiate()
+			bullet.start(self.position + $Head.position, $Area2D.rotation - deg_to_rad(deg * i), self)
 			get_parent().add_child(bullet)
-			yield()
+			await get_tree().process_frame

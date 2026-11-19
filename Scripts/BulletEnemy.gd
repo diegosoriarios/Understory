@@ -1,6 +1,5 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
-var velocity = Vector2()
 
 func start(pos, dir, ignore, speed = 500):
 	rotation = dir
@@ -8,12 +7,14 @@ func start(pos, dir, ignore, speed = 500):
 	position = pos
 	velocity = Vector2(speed, 0).rotated(rotation)
 
+var life = 4.0
+
 func _physics_process(delta):
-	var collision = move_and_collide(velocity * delta)
-	if collision:
-		velocity = velocity.bounce(collision.normal)
-		if collision.collider.has_method("hit"):
-			collision.collider.hit()
+	life -= delta
+	if life <= 0.0:
+		queue_free()
+		return
+	position += velocity * delta
 	
 	var bodies = $Area2D.get_overlapping_bodies()
 	
@@ -23,6 +24,3 @@ func _physics_process(delta):
 		if body.name == "Player":
 			body.set_take_damage(true)
 			queue_free()
-
-func _on_VisibilityNotifier2D_screen_exited():
-	queue_free()

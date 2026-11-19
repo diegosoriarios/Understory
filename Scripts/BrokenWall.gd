@@ -1,6 +1,6 @@
 extends Area2D
 
-var hp = int(rand_range(3, 5))
+var hp = int(randf_range(3, 5))
 
 func _ready():
 	randomize()
@@ -11,4 +11,4 @@ func _process(delta):
 
 func hit():
 	hp -= 1
-	$Sprite.frame += 1
+	$Sprite2D.frame += 1

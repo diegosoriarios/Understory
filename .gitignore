@@ -12,3 +12,8 @@ export_presets.cfg
 data_*/
 
 .DS_Store
+# Godot 4 editor/import cache
+.godot/
+
+# Raw asset pack kept local; only the chosen crosshair is tracked
+/Assets/Sprites/kenney_crosshairPack/

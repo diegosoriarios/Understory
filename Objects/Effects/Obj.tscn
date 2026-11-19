@@ -1,6 +1,6 @@
 [gd_scene format=2]
 
-[node name="Sprite" type="Sprite"]
+[node name="Sprite2D" type="Sprite2D"]
 scale = Vector2( 0.5, 0.5 )
 vframes = 5
 hframes = 5

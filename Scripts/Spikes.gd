@@ -19,10 +19,10 @@ func _process(delta):
 				#queue_free()
 		
 		$CollisionPolygon2D.scale = shapeArea
-		$Shape.visible = true
+		$Shape3D.visible = true
 	else:
 		$CollisionPolygon2D.scale = Vector2.ZERO
-		$Shape.visible = false
+		$Shape3D.visible = false
 	
 	if int(frame) % 20 == 0 and int(frame) != 0:
 		attack = !attack

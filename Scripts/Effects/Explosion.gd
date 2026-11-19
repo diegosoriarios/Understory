@@ -47,9 +47,8 @@ class Fragmentation:
 
 func img():
 	for n in range(25):
-		var node = objNode.instance()
+		var node = objNode.instantiate()
 		node.set_texture(texture)
-		print(node)
 		obj.append(node)
 		obj[n].set_frame(n)
 		add_child(obj[n])
@@ -77,8 +76,8 @@ func explosion():
 			drops[i].move(0, GRAVITY)
 			drops[i].integrate()
 			obj[i].set_position(Vector2(drops[i].bounce().x, drops[i].bounce().y))
-			if obj[i].get_position().x > pos.x: obj[i].rotate(rand_range(-0.1, -0.5))
-			if obj[i].get_position().x < pos.x: obj[i].rotate(rand_range(0.1, 0.5))
+			if obj[i].get_position().x > pos.x: obj[i].rotate(randf_range(-0.1, -0.5))
+			if obj[i].get_position().x < pos.x: obj[i].rotate(randf_range(0.1, 0.5))
 			if obj[i].get_position().y >= pos.y: obj[i].set_rotation(0.1)
 		timer += 1
 		
