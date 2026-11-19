@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scripts/Enemies/Boss2.gd" type="Script" id=1]
 [ext_resource path="res://icon.png" type="Texture2D" id=2]
-[ext_resource path="res://Assets/Sprites/Enemies/Asmodaeus.png" type="Texture2D" id=3]
+[ext_resource path="res://Assets/Sprites/Enemies/Kenney/boss2_frames.tres" type="SpriteFrames" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 59.9999, 59 )
@@ -19,8 +19,12 @@ __meta__ = {
 "
 }
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource( 3 )
+[node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+frames = ExtResource( 3 )
+autoplay = "move"
+animation = "move"
+scale = Vector2( 3.0, 3.0 )
+offset = Vector2( 0, -58.7 )
 
 [node name="Horse" type="Sprite2D" parent="."]
 visible = false

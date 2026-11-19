@@ -97,15 +97,21 @@ func check_enemies() -> void:
 		"Walker": "walker", "Enemy1": "enemy1", "Enemy2": "enemy2", "Enemy3": "enemy3",
 		"Enemy4": "enemy4", "Enemy5": "enemy5", "Enemy7": "enemy7", "Enemy9": "enemy9",
 		"Enemy11": "enemy11", "Enemy12": "enemy12", "Fly1": "fly1", "Fly2": "fly2",
-		"Boss3": "boss3",
+		"Boss1": "boss1", "Boss2": "boss2", "Boss3": "boss3",
 	}
 	for scene in scenes:
 		var node = load("res://Objects/Enemies/%s.tscn" % scene).instantiate()
-		var sprite: Sprite2D = node.find_child("icon", true, false)
+		var sprite: AnimatedSprite2D = node.find_child("icon", true, false)
 		if sprite == null:
 			sprite = node.find_child("Sprite2D", true, false)
-		var tex_path := str(sprite.texture.resource_path) if sprite and sprite.texture else ""
-		check(tex_path.ends_with("Drawn/%s.png" % scenes[scene]), "%s uses drawn art" % scene)
+		check(sprite != null, "%s has animated sprite" % scene)
+		if sprite:
+			var frames := sprite.sprite_frames
+			check(frames != null and frames.has_animation("move") and frames.get_frame_count("move") == 2,
+				"%s has two-frame move animation" % scene)
+			var tex_path := str(frames.get_frame_texture("move", 0).resource_path) if frames else ""
+			check(tex_path.contains("Assets/Sprites/Enemies/Kenney/%s_" % scenes[scene]),
+				"%s uses Kenney enemy art" % scene)
 		node.free()
 
 

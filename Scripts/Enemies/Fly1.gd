@@ -46,7 +46,7 @@ func hit():
 		
 		var explosion = Explosion.instantiate()
 		explosion.scale = scale
-		explosion.change_texture($icon.get_texture())
+		explosion.change_texture($icon.sprite_frames.get_frame_texture($icon.animation, $icon.frame))
 		explosion.global_position = global_position
 		get_parent().add_child(explosion)
 		explosion.active()
