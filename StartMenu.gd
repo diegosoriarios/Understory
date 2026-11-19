@@ -15,9 +15,7 @@ func _on_StartGame_pressed():
 	global.xPos = 0
 	global.yPos = 0
 	global.shake = 0.0
-	global.double_jump_active = false
-	global.wall_jump = false
-	global.has_wings = false
+	global.weapon = 0
 	get_tree().change_scene_to_file("res://World.tscn")
 
 func _on_QuitGame_pressed():

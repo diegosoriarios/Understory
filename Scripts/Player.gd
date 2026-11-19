@@ -5,28 +5,33 @@ const UP = Vector2(0, -1)
 const MAX_HP = 3
 const COYOTE_TIME = 0.09
 const JUMP_BUFFER_TIME = 0.1
-const WALL_SLIDE_SPEED = 60.0
-const WALL_JUMP_PUSH = 260.0
-const WALL_JUMP_LOCK = 0.16
+const WEAPON_NORMAL = 0
+const WEAPON_MACHINE = 1
+const WEAPON_SPREAD = 2
+const FIRE_RATE = {WEAPON_NORMAL: 0.28, WEAPON_MACHINE: 0.09, WEAPON_SPREAD: 0.34}
+const WEAPON_LETTER = {WEAPON_NORMAL: "N", WEAPON_MACHINE: "M", WEAPON_SPREAD: "S"}
+const WEAPON_TOAST = {
+	WEAPON_NORMAL: "Normal gun",
+	WEAPON_MACHINE: "Machine gun! Hold fire!",
+	WEAPON_SPREAD: "Spread gun! Hold fire!",
+}
 var motion = Vector2()
 var speed = 200
 var gravity = 10
 var jump_force = -400
 var acceleration = 50
 var max_speed = 200
-var jumps = 0
 @export var next_level: String = ""
-var gun = 1
+var weapon = WEAPON_NORMAL
+var fire_cd = 0.0
 var take_damage : set = set_take_damage
 var frame = 0
 var crouch = false
 var stand
-var stabbing = false
 var is_jumping
 var hp = MAX_HP
 var coyote = 0.0
 var jump_buffer = 0.0
-var wall_lock = 0.0
 var aim_dir := Vector2.RIGHT
 var aim_from_pad := false
 var gun_right := true
@@ -36,6 +41,7 @@ var last_mouse_screen := Vector2.ZERO
 @onready var hud_time: Label = $HUD/Time
 @onready var hud_deaths: Label = $HUD/Deaths
 @onready var hud_toast: Label = $HUD/Toast
+@onready var hud_weapon: Label = $HUD/Weapon
 
 var Bullet = preload('res://Objects/Bullet.tscn')
 
@@ -47,30 +53,12 @@ func _process(delta):
 		frame += delta * 10
 		$Sprite2D.visible = false if int(frame) % 2 == 0 else true
 		if (int(frame) >= 10): on_timer_timeout()
-	
-	if stabbing:
-		frame += delta * 10
-		
-		if (int(frame) > 3):
-			$RayCast2D.enabled = false
-			$RayCast2D.visible = false
-			$AnimationPlayer.stop()
-			frame = 0
-			stabbing = false
 
 func _physics_process(delta):
 	motion.y += gravity
 	var friction = false
 	global.time += delta
-	wall_lock = maxf(wall_lock - delta, 0.0)
-	
-	var wall_normal = Vector2.ZERO
-	if global.wall_jump and is_on_wall() and not is_on_floor():
-		wall_normal = get_wall_normal()
-		var input_dir = Input.get_axis("ui_left", "ui_right")
-		if input_dir * wall_normal.x < 0.0 and motion.y > WALL_SLIDE_SPEED:
-			motion.y = WALL_SLIDE_SPEED
-			_play_anim("jump")
+	fire_cd = maxf(fire_cd - delta, 0.0)
 	
 	_update_aim()
 	
@@ -79,8 +67,9 @@ func _physics_process(delta):
 	else:
 		$CollisionShape2D.scale.y = stand.y
 	
-	if Input.is_action_just_pressed("shoot"):
+	if Input.is_action_pressed("shoot") and fire_cd <= 0.0:
 		shoot()
+		fire_cd = FIRE_RATE[weapon]
 	
 	if Input.is_action_pressed("crouch"):
 		crouch = true
@@ -89,31 +78,23 @@ func _physics_process(delta):
 		crouch = false
 	
 	if Input.is_action_pressed("ui_right"):
-		if wall_lock <= 0.0:
-			motion.x = min(motion.x + acceleration, max_speed)
+		motion.x = min(motion.x + acceleration, max_speed)
 		if !is_jumping: _play_anim("run")
 	elif Input.is_action_pressed("ui_left"):
-		if wall_lock <= 0.0:
-			motion.x = max(motion.x - acceleration, -max_speed)
-	
+		motion.x = max(motion.x - acceleration, -max_speed)
 		if !is_jumping: _play_anim("run")
 	else:
 		if !is_jumping: _play_anim("idle")
 		friction = true
 	
-	if global.has_wings:
-		if Input.is_action_pressed("jump"):
-			motion.y = jump_force
-	
 	if is_on_floor():
 		coyote = COYOTE_TIME
 		is_jumping = false
-		jumps = 0
-		if friction == true and wall_lock <= 0.0:
+		if friction == true:
 			motion.x = lerp(motion.x, 0.0, 0.2)
 	else:
 		coyote -= delta
-		if friction == true and wall_lock <= 0.0:
+		if friction == true:
 			motion.x = lerp(motion.x, 0.0, 0.05)
 	
 	if Input.is_action_just_pressed("jump"):
@@ -121,32 +102,13 @@ func _physics_process(delta):
 	else:
 		jump_buffer -= delta
 	
-	if jump_buffer > 0.0:
-		if wall_normal != Vector2.ZERO and wall_lock <= 0.0:
-			motion.y = jump_force
-			motion.x = signf(wall_normal.x) * WALL_JUMP_PUSH
-			jumps = 1
-			is_jumping = true
-			wall_lock = WALL_JUMP_LOCK
-			jump_buffer = 0.0
-			coyote = 0.0
-			_play_anim("jump")
-			Sfx.play("walljump")
-		elif coyote > 0.0:
-			_play_anim("jump")
-			Sfx.play("jump")
-			is_jumping = true
-			motion.y = jump_force
-			jumps = 1
-			jump_buffer = 0.0
-			coyote = 0.0
-		elif jumps < 2 and global.double_jump_active == true and not is_on_floor():
-			motion.y = jump_force
-			is_jumping = true
-			_play_anim("jump")
-			Sfx.play("jump", 1.18)
-			jumps += 1
-			jump_buffer = 0.0
+	if jump_buffer > 0.0 and coyote > 0.0:
+		_play_anim("jump")
+		Sfx.play("jump")
+		is_jumping = true
+		motion.y = jump_force
+		jump_buffer = 0.0
+		coyote = 0.0
 	
 	velocity = motion
 	up_direction = UP
@@ -161,7 +123,7 @@ func _physics_process(delta):
 	
 	hud_time.text = "Time: %ds" % int(global.time)
 	hud_deaths.text = "Deaths: %d" % global.deaths
-	
+
 
 
 func _ready():
@@ -172,8 +134,6 @@ func _ready():
 	if global.xPos != 0 and global.yPos != 0:
 		motion.x = global.xPos
 		motion.y = global.yPos
-		get_node(".").motion.x = global.xPos
-		get_node(".").motion.y = global.yPos
 		
 	velocity = motion
 	up_direction = UP
@@ -181,6 +141,8 @@ func _ready():
 	motion = velocity
 	
 	stand = $CollisionShape2D.scale
+	weapon = global.weapon
+	hud_weapon.text = WEAPON_LETTER[weapon]
 	update_hud()
 	setup_camera_limits()
 
@@ -222,8 +184,6 @@ func _update_aim() -> void:
 	$Muzzle.position.x = 18.0 if gun_right else -18.0
 	$Muzzle/icon.flip_v = not gun_right
 	$Muzzle/icon.flip_h = false
-	$RayCast2D.rotation = 0.0 if gun_right else PI
-	$RayCast2D/Weapon.flip_h = not gun_right
 	var reticle := get_node_or_null("Reticle") as Sprite2D
 	if reticle:
 		reticle.visible = pad_active
@@ -231,33 +191,27 @@ func _update_aim() -> void:
 			reticle.global_position = global_position + aim_dir * 110.0
 
 
+func _spawn_bullet(angle: float):
+	var bullet = Bullet.instantiate()
+	bullet.start($Muzzle.global_position, angle, self)
+	get_parent().add_child(bullet)
+
 func shoot():
-	if gun == 0:
-		Sfx.play("walljump", 1.4)
-		stabbing = true
-		$RayCast2D.enabled = true
-		$RayCast2D.visible = true
-		
-		$AnimationPlayer.play("Attack")
-		
-		var coll = $RayCast2D.get_collider()
-		check_colision(coll)
-	elif gun == 1:
-		Sfx.play("shoot")
-		var bullet = Bullet.instantiate()
-		bullet.start($Muzzle.global_position, $Muzzle.rotation, self)
-		get_parent().add_child(bullet)
-	elif gun == 2:
+	if weapon == WEAPON_SPREAD:
 		Sfx.play("shoot", 0.92)
-		var bullet1 = Bullet.instantiate()
-		var bullet2 = Bullet.instantiate()
-		var bullet3 = Bullet.instantiate()
-		bullet1.start($Muzzle.global_position, $Muzzle.rotation, self)
-		bullet2.start($Muzzle.global_position, $Muzzle.rotation + deg_to_rad(15), self)
-		bullet3.start($Muzzle.global_position, $Muzzle.rotation - deg_to_rad(15), self)
-		get_parent().add_child(bullet1)
-		get_parent().add_child(bullet2)
-		get_parent().add_child(bullet3)
+		_spawn_bullet($Muzzle.rotation)
+		_spawn_bullet($Muzzle.rotation + deg_to_rad(15))
+		_spawn_bullet($Muzzle.rotation - deg_to_rad(15))
+	else:
+		Sfx.play("shoot", 1.25 if weapon == WEAPON_MACHINE else 1.0)
+		_spawn_bullet($Muzzle.rotation)
+
+func pick_weapon(kind: int):
+	weapon = kind
+	global.weapon = kind
+	hud_weapon.text = WEAPON_LETTER[weapon]
+	fire_cd = 0.0
+	show_toast(WEAPON_TOAST[kind])
 
 func on_timer_timeout():
 	$Sprite2D.visible = true
@@ -280,6 +234,7 @@ func hit():
 
 func die():
 	global.deaths += 1
+	global.weapon = WEAPON_NORMAL
 	Sfx.play("death")
 	global.add_shake(8.0)
 	get_tree().reload_current_scene()
@@ -293,7 +248,3 @@ func update_hud():
 		return
 	var filled = max(hp, 0)
 	hud_hearts.text = "♥".repeat(filled) + "♡".repeat(MAX_HP - filled)
-
-func check_colision(coll):
-	if $RayCast2D.is_colliding() and coll.is_in_group("enemy"):
-		coll.hit()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://Objects/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/JungleDirtTileSet.tres" type="TileSet" id=2]
@@ -8,13 +8,14 @@
 [ext_resource path="res://Objects/Door.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Objects/Backdrop.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Assets/StoneTileSet.tres" type="TileSet" id=8]
-[ext_resource path="res://Objects/Enemies/Fly1.tscn" type="PackedScene" id=9]
-[ext_resource path="res://Objects/Enemies/Walker.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Objects/Enemies/Walker.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Objects/WeaponPickup.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Objects/Spikes.tscn" type="PackedScene" id=11]
-[ext_resource path="res://Objects/Enemies/Boss1.tscn" type="PackedScene" id=12]
-[ext_resource path="res://Assets/Sprites/Assets/decor/rock.png" type="Texture2D" id=13]
-[ext_resource path="res://Assets/Sprites/Assets/decor/boulder.png" type="Texture2D" id=14]
-[ext_resource path="res://Assets/Sprites/Assets/decor/mossrock.png" type="Texture2D" id=15]
+[ext_resource path="res://Objects/Enemies/Fly1.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Objects/Enemies/Boss1.tscn" type="PackedScene" id=13]
+[ext_resource path="res://Assets/Sprites/Assets/decor/rock.png" type="Texture2D" id=14]
+[ext_resource path="res://Assets/Sprites/Assets/decor/boulder.png" type="Texture2D" id=15]
+[ext_resource path="res://Assets/Sprites/Assets/decor/mossrock.png" type="Texture2D" id=16]
 
 [sub_resource type="Environment" id=1]
 background_mode = 4
@@ -43,11 +44,18 @@ environment = SubResource( 1 )
 [node name="Backdrop" parent="." instance=ExtResource( 7 )]
 ground_y = 384
 
-[node name="Walker" parent="." instance=ExtResource( 10 )]
+[node name="MachinePickup" parent="." instance=ExtResource( 10 )]
+position = Vector2( 144, 368 )
+kind = "machine"
+
+[node name="Walker" parent="." instance=ExtResource( 9 )]
 position = Vector2( 272, 368 )
 
-[node name="Walker2" parent="." instance=ExtResource( 10 )]
+[node name="Walker2" parent="." instance=ExtResource( 9 )]
 position = Vector2( 400, 368 )
+
+[node name="Walker3" parent="." instance=ExtResource( 9 )]
+position = Vector2( 464, 368 )
 
 [node name="Spikes1" parent="." instance=ExtResource( 11 )]
 position = Vector2( 528, 383 )
@@ -55,10 +63,13 @@ position = Vector2( 528, 383 )
 [node name="Spikes2" parent="." instance=ExtResource( 11 )]
 position = Vector2( 560, 383 )
 
-[node name="Fly1" parent="." instance=ExtResource( 9 )]
+[node name="Fly1" parent="." instance=ExtResource( 12 )]
 position = Vector2( 656, 304 )
 
-[node name="Boss" parent="." instance=ExtResource( 12 )]
+[node name="Fly12" parent="." instance=ExtResource( 12 )]
+position = Vector2( 784, 336 )
+
+[node name="Boss" parent="." instance=ExtResource( 13 )]
 position = Vector2( 976, 368 )
 
 [node name="Door" parent="." instance=ExtResource( 6 )]
@@ -72,23 +83,23 @@ target_scene = "res://Levels/4.tscn"
 position = Vector2( 242, 342 )
 z_index = -1
 centered = false
-texture = ExtResource( 13 )
+texture = ExtResource( 14 )
 
 [node name="DecorBoulder2" type="Sprite2D" parent="."]
 position = Vector2( 640, 366 )
 z_index = -1
 centered = false
-texture = ExtResource( 14 )
+texture = ExtResource( 15 )
 
 [node name="DecorMossrock3" type="Sprite2D" parent="."]
 position = Vector2( 1020, 361 )
 z_index = -1
 centered = false
-texture = ExtResource( 15 )
+texture = ExtResource( 16 )
 
 [node name="DecorRock4" type="Sprite2D" parent="."]
 position = Vector2( 1330, 214 )
 z_index = -1
 centered = false
 flip_h = true
-texture = ExtResource( 13 )
+texture = ExtResource( 14 )

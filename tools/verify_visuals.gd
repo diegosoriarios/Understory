@@ -49,15 +49,15 @@ func _init() -> void:
 	check(spike_sprite != null and spike_sprite.texture != null, "spikes sprite has texture")
 	spikes.free()
 
-	for pickup in ["res://Objects/DoubleJumpPickup.tscn", "res://Objects/WallJumpPickup.tscn"]:
-		var p = load(pickup).instantiate()
-		var spr: Sprite2D = p.get_node_or_null("Sprite2D")
-		var mat: CanvasItemMaterial = null
-		if spr:
-			mat = spr.material as CanvasItemMaterial
-		check(mat != null and mat.blend_mode == CanvasItemMaterial.BLEND_MODE_ADD,
-			"%s uses additive blend" % pickup)
-		p.free()
+	var pickup = load("res://Objects/WeaponPickup.tscn").instantiate()
+	var spr: Sprite2D = pickup.get_node_or_null("Sprite2D")
+	var mat: CanvasItemMaterial = null
+	if spr:
+		mat = spr.material as CanvasItemMaterial
+	check(mat != null and mat.blend_mode == CanvasItemMaterial.BLEND_MODE_ADD,
+		"weapon pickup uses additive blend")
+	check(pickup.get_node_or_null("Letter") != null, "weapon pickup has a weapon letter")
+	pickup.free()
 
 	print("RESULT: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	quit(1 if failures > 0 else 0)

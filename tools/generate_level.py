@@ -8,6 +8,7 @@ Terrain legend (rows of equal width):
 Entity placements are (symbol, col, row) lists; symbols:
   M start  N portal  W Walker  F Fly1  G Fly2  1-5/7/9 EnemyN  E Enemy11
   T Enemy12  S spawner  H moving platform  ^ spikes  K key  D door  B boss
+  m machine-gun pickup  s spread-gun pickup
 
 Writes the .tscn files and /tmp/opencode/levels_manifest.json for verification.
 """
@@ -30,8 +31,7 @@ SCENES = {
     "lava": "res://Objects/Lava.tscn",
     "spikes": "res://Objects/Spikes.tscn",
     "mover": "res://EnemyH.tscn",
-    "doublejump": "res://Objects/DoubleJumpPickup.tscn",
-    "walljump": "res://Objects/WallJumpPickup.tscn",
+    "pickup": "res://Objects/WeaponPickup.tscn",
     "backdrop": "res://Objects/Backdrop.tscn",
     "W": "res://Objects/Enemies/Walker.tscn",
     "F": "res://Objects/Enemies/Fly1.tscn",
@@ -53,7 +53,7 @@ SCENES = {
 # entity symbol -> ext-resource key (identity unless listed)
 SYM_TO_KEY = {
     "^": "spikes", "N": "portal", "S": "spawner", "K": "key", "D": "door", "H": "mover",
-    "A": "doublejump", "J": "walljump",
+    "m": "pickup", "s": "pickup",
 }
 
 # tile id -> atlas coords in JungleDirtTileSet
@@ -83,7 +83,7 @@ NAME_BY_SYMBOL = {
     "3": "Enemy3", "4": "Enemy4", "5": "Enemy5", "7": "Enemy7", "9": "Enemy9",
     "E": "Enemy11", "T": "Enemy12", "S": "Spawner", "H": "Platform",
     "^": "Spikes", "K": "Key", "D": "Door", "N": "Portal", "B": "Boss",
-    "A": "DoubleJumpPickup", "J": "WallJumpPickup",
+    "m": "MachinePickup", "s": "SpreadPickup",
 }
 
 LEVELS = [
@@ -109,12 +109,16 @@ LEVELS = [
         ],
         "entities": [
             ("M", 2, 11),
+            ("m", 5, 11),
             ("W", 8, 11),
             ("F", 6, 10),
             ("W", 24, 11),
-            ("F", 32, 10),
+            ("F", 30, 10),
+            ("W", 32, 11),
             ("S", 34, 11),
+            ("F", 38, 10),
             ("W", 42, 11),
+            ("W", 46, 11),
             ("N", 53, 11),
         ],
         "decor": [
@@ -125,7 +129,7 @@ LEVELS = [
             ("boulder", 50, False),
             ("mossrock", 26, False),
         ],
-        "spawners": [(["W"], 1)],
+        "spawners": [(["W"], 2)],
         "boss": None,
     },
     {
@@ -139,32 +143,37 @@ LEVELS = [
             "." * 64,
             "." * 64,
             "." * 64,
+            "." * 21 + "===" + "." * 20 + "====" + "." * 16,
             "." * 64,
-            "." * 24 + "####" + "." * 36,
+            "." * 30 + "====" + "." * 30,
             "." * 64,
-            "." * 14 + "######" + "." * 20 + "########" + "." * 11 + "#####",
-            "." * 14 + "######" + "." * 20 + "########" + "." * 11 + "#####",
-            "." * 14 + "######" + "." * 20 + "########" + "." * 11 + "#####",
-            "." * 14 + "######" + "." * 20 + "########" + "." * 16,
-            "." * 14 + "######" + "." * 20 + "########" + "." * 16,
-            "#" * 30 + "LLLL" + "#" * 30,
+            "." * 64,
+            "." * 64,
+            "#" * 20 + "L" * 4 + "#" * 12 + "L" * 4 + "#" * 24,
             "#" * 64,
         ],
         "entities": [
-            ("M", 2, 13),
-            ("W", 10, 13),
-            ("1", 17, 8),
-            ("W", 26, 13),
-            ("S", 28, 13),
-            ("3", 36, 13),
-            ("2", 44, 8),
-            ("K", 47, 8),
-            ("1", 50, 13),
-            ("^", 55, 13),
-            ("^", 56, 13),
-            ("^", 57, 13),
-            ("D", 61, 13),
-            ("N", 62, 13),
+            ("M", 2, 11),
+            ("m", 5, 11),
+            ("W", 9, 11),
+            ("W", 13, 11),
+            ("F", 16, 10),
+            ("S", 18, 11),
+            ("2", 21, 5),
+            ("K", 31, 7),
+            ("s", 33, 7),
+            ("W", 26, 11),
+            ("W", 29, 11),
+            ("3", 35, 11),
+            ("W", 40, 11),
+            ("F", 42, 10),
+            ("1", 49, 11),
+            ("^", 53, 11),
+            ("^", 54, 11),
+            ("^", 55, 11),
+            ("W", 58, 11),
+            ("D", 61, 11),
+            ("N", 62, 11),
         ],
         "decor": [
             ("tree", 8, False),
@@ -189,31 +198,39 @@ LEVELS = [
             "." * 64,
             "." * 64,
             "." * 64,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 35 + "===" + "." * 11,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 36 + "===" + "." * 10,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 33 + "===" + "." * 7 + "#####.",
-            "." * 9 + "#" + "." * 4 + "#" + "." * 5 + "===" + "." * 4 + "===" + "." * 8 + "===" + "." * 17 + "#####" + ".",
-            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
-            "." * 9 + "#" + "." * 4 + "#" + "." * 49,
-            "." * 14 + "#" + "." * 49,
+            "." * 52 + "===" + "." * 9,
+            "." * 64,
+            "." * 36 + "===" + "." * 25,
+            "." * 64,
+            "." * 64,
+            "." * 64,
+            "." * 20 + "===" + "." * 21 + "===" + "." * 9 + "#####" + "." * 3,
+            "." * 26 + "===" + "." * 3 + "===" + "." * 14 + "===" + "." * 12,
+            "." * 21 + "===" + "." * 40,
             "#" * 18 + "L" * 28 + "#" * 18,
             "#" * 64,
         ],
         "entities": [
-            ("M", 2, 15),
-            ("J", 4, 15),
-            ("W", 7, 15),
-            ("A", 16, 15),
-            ("S", 26, 8),
-            ("H", 34, 14),
-            ("F", 30, 11),
-            ("G", 40, 10),
-            ("K", 51, 5),
-            ("D", 59, 15),
-            ("N", 61, 15),
+            ("M", 2, 14),
+            ("m", 5, 14),
+            ("W", 8, 14),
+            ("F", 11, 13),
+            ("W", 14, 14),
+            ("3", 21, 11),
+            ("F", 27, 12),
+            ("G", 33, 12),
+            ("1", 37, 7),
+            ("H", 30, 14),
+            ("G", 43, 13),
+            ("2", 45, 11),
+            ("S", 48, 14),
+            ("W", 49, 14),
+            ("W", 53, 14),
+            ("s", 57, 11),
+            ("K", 58, 11),
+            ("G", 53, 5),
+            ("D", 61, 14),
+            ("N", 62, 14),
         ],
         "decor": [
             ("tree", 2, False),
@@ -248,11 +265,14 @@ LEVELS = [
         ],
         "entities": [
             ("M", 2, 11),
+            ("m", 4, 11),
             ("W", 8, 11),
             ("W", 12, 11),
+            ("W", 14, 11),
             ("^", 16, 11),
             ("^", 17, 11),
             ("F", 20, 9),
+            ("F", 24, 10),
             ("B", 30, 11),
             ("D", 44, 11),
             ("N", 46, 11),
@@ -291,8 +311,10 @@ LEVELS = [
         ],
         "entities": [
             ("M", 2, 13),
+            ("s", 10, 13),
             ("4", 14, 9),
             ("7", 20, 13),
+            ("W", 30, 13),
             ("^", 24, 13),
             ("^", 25, 13),
             ("B", 38, 13),
@@ -335,7 +357,9 @@ LEVELS = [
         ],
         "entities": [
             ("M", 2, 15),
-            ("5", 8, 15),
+            ("m", 4, 15),
+            ("W", 8, 15),
+            ("5", 11, 15),
             ("9", 14, 15),
             ("S", 20, 15),
             ("B", 40, 15),
@@ -467,6 +491,12 @@ def build_level(spec):
             nodes.append(
                 f'[node name="{node_name}" parent="." instance=ExtResource( {ext_ids["spikes"]} )]\n'
                 f"position = Vector2( {px}, {row * TILE + TILE - 1} )\n"
+            )
+        elif sym in ("m", "s"):
+            nodes.append(
+                f'[node name="{node_name}" parent="." instance=ExtResource( {ext_ids["pickup"]} )]\n'
+                f"position = Vector2( {px}, {py} )\n"
+                f'kind = "{"machine" if sym == "m" else "spread"}"\n'
             )
         else:
             scene_key = spec["boss"] if sym == "B" else SYM_TO_KEY.get(sym, sym)
